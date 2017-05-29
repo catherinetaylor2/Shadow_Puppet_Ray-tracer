@@ -29,7 +29,6 @@ class scene{
             return top_left;
         }
     private:
-    protected:
         int x_res;
         int y_res;
         float width;
@@ -40,5 +39,22 @@ class scene{
         vector3 Camera_lookup;
         vector3 Centre_of_image;
         vector3 top_left;       
+};
+class light{ //assuming spherical light
+    public:
+        light(vector3 light_centre, float light_radius, float light_illumination);
+        vector3 get_centre(void){
+            return centre;
+        }
+        float get_radius(void){
+            return radius;
+        }
+        float get_illumination(void){
+            return illumination;
+        }
+    private:
+        vector3 centre;
+        float radius;
+        float illumination;
 };
 #endif

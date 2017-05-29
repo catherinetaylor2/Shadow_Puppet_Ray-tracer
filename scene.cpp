@@ -23,3 +23,9 @@ scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 o
     Centre_of_image = vector3::vec_add(Camera_origin,vector3::vec_scal_mult(-focal_length,w));     
     top_left = vector3::vec_add3(Centre_of_image, vector3::vec_scal_mult(-width/2.0f,u), vector3::vec_scal_mult(height/2.0f,v));
 }
+
+light::light(vector3 light_centre, float light_radius, float light_illumination){
+    centre.setValue(light_centre.x(), light_centre.y(), light_centre.z());
+    radius = light_radius;
+    illumination = light_illumination;
+}
