@@ -15,13 +15,14 @@ scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 o
     Camera_lookat.setValue(lookat.x(), lookat.y(), lookat.z());
     Camera_lookup.setValue(lookup.x(), lookup.y(), lookup.z());
 
-    vector3 w = vector3::vec_add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat));
-    w.normalize();
-    vector3 u = vector3::crossproduct(Camera_lookup, w);
-    u.normalize();
-    vector3 v = vector3::crossproduct(w,u); 
-    Centre_of_image = vector3::vec_add(Camera_origin,vector3::vec_scal_mult(-focal_length,w));     
-    top_left = vector3::vec_add3(Centre_of_image, vector3::vec_scal_mult(-width/2.0f,u), vector3::vec_scal_mult(height/2.0f,v));
+    eye_n = vector3::vec_add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat));
+    eye_n.normalize();
+    eye_u = vector3::crossproduct(Camera_lookup, eye_n);
+    eye_u.normalize();
+    eye_v = vector3::crossproduct(eye_n,eye_u); 
+    Centre_of_image = vector3::vec_add(Camera_origin,vector3::vec_scal_mult(-focal_length,eye_n));     
+    top_left = vector3::vec_add3(Centre_of_image, vector3::vec_scal_mult(-width/2.0f,eye_u), vector3::vec_scal_mult(height/2.0f, eye_v));
+    ratio = width/(float)x_res;
 }
 
 light::light(vector3 light_centre, float light_radius, float light_illumination){

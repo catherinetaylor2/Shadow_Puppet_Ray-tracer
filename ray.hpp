@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "vec3.hpp"
+#include "search_tree.hpp"
 
 class Ray{
     public:
@@ -16,5 +17,6 @@ class Ray{
         vector3 get_direction(void){
             return direction;
         }
+       
 };
 #endif

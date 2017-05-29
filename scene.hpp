@@ -28,17 +28,33 @@ class scene{
         vector3 get_corner(void){
             return top_left;
         }
+        vector3 get_n(void){
+            return eye_n;
+        }
+        vector3 get_u(void){
+            return eye_u;
+        }
+        vector3 get_v(void){
+            return eye_v;
+        }
+        float get_ratio(void){
+            return ratio;
+        }
     private:
         int x_res;
         int y_res;
         float width;
         float height;
         float focal_length;
+        float ratio;
         vector3 Camera_origin;
         vector3 Camera_lookat;
         vector3 Camera_lookup;
         vector3 Centre_of_image;
         vector3 top_left;       
+        vector3 eye_n;
+        vector3 eye_u;
+        vector3 eye_v;
 };
 class light{ //assuming spherical light
     public:
