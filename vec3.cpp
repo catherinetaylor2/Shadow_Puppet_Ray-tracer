@@ -13,13 +13,13 @@ vector3::vector3(){
     y_val=0.0f;
     z_val=0.0f;
 }
-float vector3::get_x(void){
+float vector3::x(void){
     return x_val;
 }
-float vector3::get_y(void){
+float vector3::y(void){
     return y_val;
 }
-float vector3::get_z(void){
+float vector3::z(void){
     return z_val;
 }
 void vector3::setValue(float x, float y, float z){

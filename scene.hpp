@@ -1,0 +1,44 @@
+#ifndef scene_hpp
+#define scene_hpp
+
+#include "vec3.hpp"
+#include "ray.hpp"
+
+class scene{
+    public:
+        scene(int xres, int yres, float fieldOfView, float focalLength, vector3 origin, vector3 lookat, vector3 lookup);
+        int get_x_res(void){
+            return x_res;
+        }
+        int get_y_res(void){
+            return y_res;
+        }
+        float get_width(void){
+            return width;
+        }
+        float get_height(void){
+            return height;
+        }
+        float get_distance_to_image(void){
+            return focal_length;
+        }
+        vector3 get_centre(void){
+            return Centre_of_image;
+        }
+        vector3 get_corner(void){
+            return top_left;
+        }
+    private:
+    protected:
+        int x_res;
+        int y_res;
+        float width;
+        float height;
+        float focal_length;
+        vector3 Camera_origin;
+        vector3 Camera_lookat;
+        vector3 Camera_lookup;
+        vector3 Centre_of_image;
+        vector3 top_left;       
+};
+#endif

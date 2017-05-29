@@ -12,7 +12,9 @@
 #include <thread>
 #include "Read_Obj.hpp"
 #include "vec3.hpp"
-#include "ray.cpp"
+#include "ray.hpp"
+#include "BITMAP.hpp"
+#include "scene.hpp"
 
 int main(int argc, char* argv[] ){
 
@@ -32,7 +34,11 @@ int main(int argc, char* argv[] ){
     ObjFile mesh_dino("dino_puppet.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
 
+    vector3 eye(0,0,-50);
+    vector3 lookat(0,0,1);
+    vector3 lookup(0,1,-50);
 
+    scene myScene(width, height, 90, 10, eye, lookat, lookup);
 
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
