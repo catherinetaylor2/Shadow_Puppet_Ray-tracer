@@ -42,8 +42,8 @@ bool triangle::ray_triangle_intersection(Ray R){
     float t_min = infinity;
 	int index1, index2, index3;
     output.clear();
-    if(B_root.ray_box_intersection(R.get_origin(), R.get_direction())==1){
-        search_tree::traverse_tree(root, R.get_origin(), R.get_direction(), &output);
+    if(B_root.ray_box_intersection(R)==1){
+        search_tree::traverse_tree(root, R, &output);
     }
     *k = new int[output.size()+1];
     (*k)[0] = -1;

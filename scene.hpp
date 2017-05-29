@@ -80,6 +80,7 @@ class light{ //assuming square light
         vector3 get_centre(void){
             return centre;
         }
+        bool ray_intersection(Ray R);
     private:
         vector3 centre;
         float x_min;

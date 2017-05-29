@@ -53,11 +53,11 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-50.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    light myLight(-10.0f, 10.0f, -10.0f, 10.0f, 350.0f, 1.0f);
+    light myLight(-10.0f, 10.0f, -10.0f, 10.0f, 75.0f, 1.0f);
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
-    float light_length = 10.0f;
+    float light_length = 10.0f, I =0;
     int iterations=10;
     
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
@@ -68,30 +68,48 @@ int main(int argc, char* argv[] ){
         j=(x/(3))/(myScene.get_x_res());
 
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
-      //  vector3 ray_direction(s.x() - eye.x(), s.y()-eye.y(), s.z()-eye.z());
-      float value = 0;
-      for (int l=0; l<iterations;l++){
-          vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_u), vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_v));
-      
-        vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-        ray_direction.normalize();
-        Ray R(s, ray_direction);
-
-        int min_value = -1, *k ;
-        float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-        if(min_value !=-1){
-            value= value+0;
-        }
-        else{
-            value = value+1;
-        }
         
-        delete k;
+        // vector3 ray_direction(s.x() - eye.x(), s.y()-eye.y(), s.z()-eye.z());
+        // ray_direction.normalize();
+        // Ray R(eye, ray_direction);
+        // int min_value = -1, *k ; 
+        // float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k); 
+        // if(min_value !=-1){ 
+        //     I=1;
+        // }
 
-      }
-      img[x]= value*255.0f/iterations;
-      img[x+1]= value*255.0f/iterations;
-      img[x+2]= value*255.0f/iterations;
+
+        float value = 0;
+        for (int l=0; l<iterations;l++){
+            vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_u), vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_v));
+        
+            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
+            ray_direction.normalize();
+            Ray R(s, ray_direction);
+
+            int min_value = -1, *k ;
+            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
+            if(min_value !=-1){
+                value= value+0;
+            }
+            else{
+                value = value+1;
+            }
+            
+            delete k;
+
+        }
+       // if(I==0){
+        img[x]= value*190.0f/iterations;
+        img[x+1]= value*120.0f/iterations;
+        img[x+2]= value*45.0f/iterations;
+        // }
+        // else{
+        //     img[x]= value*255.0f/iterations;
+        //     img[x+1]= I*value*255.0f/iterations;
+        //     img[x+2]= I*value*255.0f/iterations;
+        // }
+
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
     BITMAP_File_Header file_header;

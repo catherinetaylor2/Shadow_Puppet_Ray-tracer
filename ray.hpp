@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include "vec3.hpp"
-#include "search_tree.hpp"
 
 class Ray{
     public:
