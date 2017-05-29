@@ -15,6 +15,7 @@
 #include "ray.hpp"
 #include "BITMAP.hpp"
 #include "scene.hpp"
+#include "triangle.hpp"
 
 int main(int argc, char* argv[] ){
 
@@ -34,11 +35,14 @@ int main(int argc, char* argv[] ){
     ObjFile mesh_dino("dino_puppet.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
 
-    vector3 eye(0,0,-50);
-    vector3 lookat(0,0,1);
-    vector3 lookup(0,1,-50);
+    vector3 eye(0.0f,0.0f,-50.0f);
+    vector3 lookat(0.0f,0.0f,1.0f);
+    vector3 lookup(0.0f,1.0f,-50.0f);
+    vector3 light_centre(0.0f,0.0f,-150.0f);
 
-    scene myScene(width, height, 90, 10, eye, lookat, lookup);
+    scene myScene(width, height, 90.0f, 10.0f, eye, lookat, lookup);
+    light myLight(light_centre, 5.0f, 1.0f);
+    
 
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
