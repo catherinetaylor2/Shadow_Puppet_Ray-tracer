@@ -47,7 +47,7 @@
      }
      if (tmin_z > tmax_z)std::swap(tmin_z, tmax_z);
 
-     if ((tmin > tmax_z)||(tmin_z>tmax)){
+     if ((tmin > tmax_z+5)||(tmin_z>tmax+10)){
          return 0;
      }
      return 1;     
@@ -75,7 +75,7 @@ void search_tree::traverse_tree(search_tree*root, vector3 eye, vector3 d, std::v
 }
 
 void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<float> *parameters, std::vector<float> initial_parameters){
-    float xmin = initial_parameters[0], ymin = initial_parameters[1], zmin = initial_parameters[2], xmax=initial_parameters[3], ymax=initial_parameters[4], zmax = initial_parameters[5];
+    float xmin = initial_parameters[0], ymin = initial_parameters[2], zmin = initial_parameters[4], xmax=initial_parameters[1], ymax=initial_parameters[3], zmax = initial_parameters[5];
     for(int j=0; j<3; j++){
         if (vertices[3*(faces[3*i+j]-1)]< xmin){
         xmin = vertices[3*(faces[3*i+j]-1)];
@@ -84,7 +84,7 @@ void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<
         ymin = vertices[3*(faces[3*i+j]-1)+1];
         }
         if (vertices[3*(faces[3*i+j]-1)+2]< zmin){
-        zmin = vertices[3*(faces[3*i+j]-1)+2]-25;
+        zmin = vertices[3*(faces[3*i+j]-1)+2];
         }
         if (vertices[3*(faces[3*i+j]-1)]> xmax){
         xmax = vertices[3*(faces[3*i+j]-1)];
@@ -93,15 +93,16 @@ void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<
         ymax =vertices[3*(faces[3*i+j]-1)+1];
         }
         if (vertices[3*(faces[3*i+j]-1)+2]> zmax){
-        zmax = vertices[3*(faces[3*i+j]-1)+2]+25;
+        zmax = vertices[3*(faces[3*i+j]-1)+2];
         }
     }   
     *parameters = {xmin, xmax, ymin, ymax, zmin, zmax};
+
 }
 
 void search_tree::leaf_nodes(float* vertices, int*faces, int number_of_faces, std::vector<search_tree*> *leaf_nodes){
     std::vector<float> parameters;
-    std::vector<float> initial_parameters = {infinity, infinity, infinity, -1*infinity, -1*infinity, -1*infinity};
+    std::vector<float> initial_parameters = {infinity, -1*infinity, infinity, -1*infinity, infinity, -1*infinity};
     for(int i = 0; i<number_of_faces; i++){ // make list of leaf_nodes.
         search_tree* leaf = new search_tree;
         leaf->number_of_node_faces = 1; 
@@ -139,10 +140,10 @@ void search_tree::build_tree(float* vertices, int* faces, std::vector<search_tre
         for(int i = first->number_of_node_faces; i<first->number_of_node_faces+second->number_of_node_faces;i++){
             temp->faces_in_node[i] = second->faces_in_node[i-first->number_of_node_faces];
         }
-        std::vector<float> initial_parameters = {infinity, infinity, infinity, -1*infinity, -1*infinity, -1*infinity};
+        std::vector<float> initial_parameters = {infinity, -1*infinity, infinity, -1*infinity, infinity, -1*infinity};
         for(int i =0; i<temp->number_of_node_faces; i++){
             search_tree::find_parameters(temp->faces_in_node[i], vertices, faces, &parameters, initial_parameters);
-            initial_parameters = {parameters[0],parameters[2],parameters[4], parameters[1], parameters[3], parameters[5]};              
+            initial_parameters = {parameters[0],parameters[1],parameters[2], parameters[3], parameters[4], parameters[5]};              
         }
         for(int j =0; j<6;j++){
              temp->parameters[j] = parameters[j];
