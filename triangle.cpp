@@ -77,5 +77,5 @@ bool triangle::ray_triangle_intersection(Ray R){
         }
         delete t_values;
     }
-    return t_min;
+    return t_min; //value of t when intersection occurs
  }

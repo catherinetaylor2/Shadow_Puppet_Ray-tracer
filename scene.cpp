@@ -25,8 +25,11 @@ scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 o
     ratio = width/(float)x_res;
 }
 
-light::light(vector3 light_centre, float light_radius, float light_illumination){
-    centre.setValue(light_centre.x(), light_centre.y(), light_centre.z());
-    radius = light_radius;
+light::light(float xmin, float xmax, float ymin, float ymax,  float z, float light_illumination){
+    x_min = xmin;
+    x_max = xmax;
+    y_min = ymin;
+    y_max = y_max;
+    z_coord = z;
     illumination = light_illumination;
 }

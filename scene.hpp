@@ -56,21 +56,19 @@ class scene{
         vector3 eye_u;
         vector3 eye_v;
 };
-class light{ //assuming spherical light
+class light{ //assuming square light
     public:
-        light(vector3 light_centre, float light_radius, float light_illumination);
-        vector3 get_centre(void){
-            return centre;
-        }
-        float get_radius(void){
-            return radius;
-        }
+        light(float xmin, float xmax, float ymin, float ymax,  float z, float light_illumination);
+        
         float get_illumination(void){
             return illumination;
         }
     private:
-        vector3 centre;
-        float radius;
+        float x_min;
+        float x_max;
+        float y_min;
+        float y_max;
+        float z_coord;
         float illumination;
 };
 #endif

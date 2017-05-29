@@ -35,7 +35,7 @@ int main(int argc, char* argv[] ){
 //Puppet mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("dino_puppet.obj");
+    ObjFile mesh_dino("dino_puppet_simple.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
@@ -46,10 +46,9 @@ int main(int argc, char* argv[] ){
     vector3 eye(0.0f,0.0f,-50.0f);
     vector3 lookat(0.0f,0.0f,1.0f);
     vector3 lookup(0.0f,1.0f,-50.0f);
-    vector3 light_centre(0.0f,0.0f,-150.0f);
 
     scene myScene(width, height, 90.0f, 3.0f, eye, lookat, lookup);
-    light myLight(light_centre, 5.0f, 1.0f);
+    light myLight(-10.0f, 10.0f, -10.0f, 10.0f, -150.0f, 1.0f);
     
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
@@ -61,53 +60,21 @@ int main(int argc, char* argv[] ){
         vector3 ray_direction(s.x() - eye.x(), s.y()-eye.y(), s.z()-eye.z());
         Ray R(eye, ray_direction);
 
-        // float t_min = 0;
-        // for(int k =0; k<F; k++){
-        //     int index1 = FV[3*k]-1, index2 = FV[3*k+1]-1, index3 = FV[3*k+2]-1;
-        //     vector3 V1(V[3*index1], V[3*index1+1], V[3*index1+2]);
-        //     vector3 V2(V[3*index2], V[3*index2+1], V[3*index2+2]);
-        //     vector3 V3(V[3*index3], V[3*index3+1], V[3*index3+2]);
-        //     triangle T(V1,V2,V3);
-        //     bool t = T.ray_triangle_intersection(R);
-        //     if(t!=0){
-        //         t_min=1;
-        //     }
-        // }
-        //     if(t_min!=0){
-        //         img[x]=255;
-        //     }
-        //     else{
-        //         img[x]=0;
-        //     }
-        //     img[x+1]=0;
-        //     img[x+2]=0;
-
-            
         int min_value = -1, *k ;
         float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-         if(min_value !=-1){
-             int m = k[min_value+1];
-            int index1 = FV[3*m]-1, index2 = FV[3*m+1]-1, index3 = FV[3*m+2]-1;
-            vector3 V1(V[3*index1], V[3*index1+1], V[3*index1+2]);
-            vector3 V2(V[3*index2], V[3*index2+1], V[3*index2+2]);
-            vector3 V3(V[3*index3], V[3*index3+1], V[3*index3+2]);
-
-            triangle T(V1,V2,V3);
-            bool t = T.ray_triangle_intersection(R);
-            if(t!=0){
-                img[x]=255;
-            }
-            else{
-                img[x]=0;
-            }
-        }
-            else{
-                img[x]=0;
-            }
+        if(min_value !=-1){
+            img[x]=255;
             img[x+1]=0;
             img[x+2]=0;
-            delete k;
-            
+
+        }
+        else{
+            img[x]=255;
+            img[x+1]=255;
+            img[x+2]=255;
+        }
+        
+        delete k;
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
     BITMAP_File_Header file_header;
