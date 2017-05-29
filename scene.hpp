@@ -59,11 +59,29 @@ class scene{
 class light{ //assuming square light
     public:
         light(float xmin, float xmax, float ymin, float ymax,  float z, float light_illumination);
-        
+        float get_xmin(void){
+            return x_min;
+        }
+        float get_xmax(void){
+            return x_max;
+        }
+        float get_ymin(void){
+            return y_min;
+        }
+        float get_ymax(void){
+            return y_max;
+        }
+        float get_z(void){
+            return z_coord;
+        }
         float get_illumination(void){
             return illumination;
         }
+        vector3 get_centre(void){
+            return centre;
+        }
     private:
+        vector3 centre;
         float x_min;
         float x_max;
         float y_min;

@@ -32,4 +32,5 @@ light::light(float xmin, float xmax, float ymin, float ymax,  float z, float lig
     y_max = y_max;
     z_coord = z;
     illumination = light_illumination;
+    centre.setValue((xmax+xmin)/2.0f, (ymax+ymin)/2.0f, z_coord);
 }

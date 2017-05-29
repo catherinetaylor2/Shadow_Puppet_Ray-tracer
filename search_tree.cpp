@@ -45,11 +45,11 @@
     if((ray_direction.z()==0)&&(ray_point.z()<parameters[4])&&(ray_point.z()>parameters[5])){
          return 0;
      }
-     if (tmin_z > tmax_z)std::swap(tmin_z, tmax_z);
+    //  if (tmin_z > tmax_z)std::swap(tmin_z, tmax_z);
 
-     if ((tmin > tmax_z+5)||(tmin_z>tmax+10)){
-         return 0;
-     }
+    //  if ((tmin > tmax_z+40)||(tmin_z>tmax+45)){
+    //      return 0;
+    //  }
      return 1;     
  }
 
