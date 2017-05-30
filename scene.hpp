@@ -3,6 +3,7 @@
 
 #include "vec3.hpp"
 #include "ray.hpp"
+#include "triangle.hpp"
 
 class scene{
     public:
@@ -80,7 +81,7 @@ class light{ //assuming square light
         vector3 get_centre(void){
             return centre;
         }
-        bool ray_intersection(Ray R);
+        bool ray_intersection(Ray R, triangle upper, triangle lower);
         static float DiffuseValue( vector3 normal, vector3 light_direction);
        
     private:
@@ -91,5 +92,6 @@ class light{ //assuming square light
         float y_max;
         float z_coord;
         float illumination;
+
 };
 #endif

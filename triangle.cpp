@@ -4,7 +4,6 @@
 #include <vector>
 #include "triangle.hpp"
 #include "vec3.hpp"
-#include "scene.hpp"
 #include "ray.hpp"
 #include "search_tree.hpp"
 

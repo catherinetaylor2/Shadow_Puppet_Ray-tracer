@@ -2,6 +2,7 @@
 #include "scene.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
+#include "triangle.hpp"
 
 #define PI 3.141592654f
 
@@ -34,29 +35,15 @@ light::light(float light_length,  float z, float light_illumination){
     illumination = light_illumination;
     centre.setValue(0.0f,0.0f, z_coord);
 }
-bool light::ray_intersection(Ray R){
-    float tmin, tmax, tmin_y, tmax_y;
-    vector3 inv_direction(1/(R.direction.x()), 1/R.direction.y(), 1/R.direction.z());
-    tmin = (x_min- R.origin.x())*inv_direction.x();
-   
-    tmax = (x_max-R.origin.x())*inv_direction.x();
-
-    tmin_y = (y_min- R.origin.y())*inv_direction.y();
-    tmax_y = (y_max- R.origin.y())*inv_direction.y();  
-     
-
-    if (tmin > tmax)std::swap(tmin, tmax); 
-    if (tmin_y > tmax_y)std::swap(tmin_y, tmax_y);  
-    if ((tmin >= tmax_y)||(tmin_y>=tmax)){
+bool light::ray_intersection(Ray R, triangle upper, triangle lower){
+    bool t_1 = upper.ray_triangle_intersection(R);
+    bool t_2 = lower.ray_triangle_intersection(R);
+    if((t_1==1)||(t_2)==1){
+        return 1;
+    }
+    else{
         return 0;
     }
-    if (tmin_y > tmin){
-        tmin = tmin_y;
-    }
-    if (tmax_y < tmax){
-        tmax = tmax_y;
-    }        
-    return 1;
 }
 float light::DiffuseValue( vector3 normal, vector3 light_direction){
     if (vector3::dotproduct(normal,light_direction)>0){        
