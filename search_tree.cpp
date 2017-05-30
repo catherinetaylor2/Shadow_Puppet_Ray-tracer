@@ -16,7 +16,7 @@
      parameters[5] = zmax;
  }
 
- int Bounding_box::ray_box_intersection(Ray R){
+bool Bounding_box::ray_box_intersection(Ray R){
     float tmin_y, tmax_y, tmin_z, tmax_z;
     vector3 inv_direction(1/(R.direction.x()), 1/R.direction.y(), 1/R.direction.z());
     tmin = (parameters[0]- R.origin.x())*inv_direction.x();

@@ -23,7 +23,7 @@ class search_tree{
 class Bounding_box{
     public:
         Bounding_box(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);  
-        int ray_box_intersection(Ray R);    
+        bool ray_box_intersection(Ray R);    
         float get_tmin(void){
             return tmin;
         }

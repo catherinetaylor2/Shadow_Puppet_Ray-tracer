@@ -39,7 +39,7 @@ int main(int argc, char* argv[] ){
 //Puppet mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("dino_puppet_simple.obj");
+    ObjFile mesh_dino("dino_puppet_handle.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
@@ -47,18 +47,30 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(V, FV, &leaf_nodes, &root);
 	std::cout<<"tree built \n";
 
+//light mesh
+    float *V_l, *N_l, *VT_l;
+    int F_l, *FV_l, *FN_l, *FT_l;
+    ObjFile mesh_light("light_source.obj");
+	mesh_dino.get_mesh_data(mesh_light, &FV_l, &FN_l, &FT_l, &VT_l, &N_l, &V_l, &F_l);
+    search_tree* root_l; 
+    std::vector<search_tree*> leaf_nodes_l;
+    search_tree::leaf_nodes(V_l, FV_l, F_l, &leaf_nodes_l);
+	search_tree::build_tree(V_l, FV_l, &leaf_nodes_l, &root_l);
+	std::cout<<"tree built \n";
+
 
     vector3 eye(0.0f,0.0f,-30.0f);
     vector3 lookat(0.0f,0.0f,1.0f);
-    vector3 lookup(0.0f,1.0f,-50.0f);
+    vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    light myLight(-10.0f, 10.0f, -10.0f, 10.0f, 75.0f, 1.0f);
+    float light_length = 10.0f;
+    light myLight(-light_length, 75.0f, 1.0f);
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
-    float light_length = 10.0f, I =0;
-    int iterations=10;
+    vector3 plane_n(0,0,1);
+    int iterations=100;
     
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
@@ -73,33 +85,47 @@ int main(int argc, char* argv[] ){
         // ray_direction.normalize();
         // Ray R(eye, ray_direction);
         // int min_value = -1, *k ; 
-        // float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k); 
-        // if(min_value !=-1){ 
-        //     I=1;
+        // float t_min = triangle::intersection_point(root_l, V_l, R,FV_l, &min_value, &k); 
+        // if(min_value!=-1){
+        //     I=1;            
         // }
-
-
-        float value = 0;
-        for (int l=0; l<iterations;l++){
-            vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_u), vector3::vec_scal_mult((0.5 - uniform_random_number())*light_length,tangent_v));
+        // else{
+        //     I=0;
+        //   //  std::cout<<"oi oi \n";
+        // }
+        // delete k;
         
+
+
+        float value = 0, alpha = 0.2f;
+        #pragma omp parallel for 
+        for (int l=0; l<iterations;l++){
+            float a = uniform_random_number();
+            float b = uniform_random_number();
+            vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*light_length,tangent_v));
             vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
+            
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
             int min_value = -1, *k ;
             float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
             if(min_value !=-1){
-                value= value+0;
+                #pragma omp critical
+                value= value+alpha;
             }
             else{
+                #pragma omp critical
                 value = value+1;
             }
             
-            delete k;
+            delete[] k;
 
         }
-       // if(I==0){
+        vector3 ray_direction(centre.x() - s.x(), centre.y()-s.y(), centre.z()-s.z());
+        ray_direction.normalize();
+
+    //  if(I==0){
         img[x]= value*190.0f/iterations;
         img[x+1]= value*120.0f/iterations;
         img[x+2]= value*45.0f/iterations;
@@ -127,6 +153,8 @@ int main(int argc, char* argv[] ){
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
+    ObjFile::clean_up(V_l,N_l, VT_l, FV_l, FN_l, FT_l);
+    search_tree::delete_tree(root_l);
     delete [] img;
 
     return 0;
