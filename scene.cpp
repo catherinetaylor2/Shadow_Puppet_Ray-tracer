@@ -34,6 +34,7 @@ light::light(float light_length,  float z, float light_illumination){
     z_coord = z;
     illumination = light_illumination;
     centre.setValue(0.0f,0.0f, z_coord);
+    direction.setValue(0.0f,0.0f,1.0f);
 }
 bool light::ray_intersection(Ray R, triangle upper, triangle lower){
     bool t_1 = upper.ray_triangle_intersection(R);

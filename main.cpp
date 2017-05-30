@@ -19,6 +19,7 @@
 #include "search_tree.hpp"
 
 #define infinity FLT_MAX;
+#define PI 3.141592654f
 
 double uniform_random_number(void){
     return rand()/double(RAND_MAX);
@@ -48,15 +49,15 @@ int main(int argc, char* argv[] ){
 	std::cout<<"tree built \n";
 
 //light mesh
-    float *V_l, *N_l, *VT_l;
-    int F_l, *FV_l, *FN_l, *FT_l;
-    ObjFile mesh_light("light_source.obj");
-	mesh_dino.get_mesh_data(mesh_light, &FV_l, &FN_l, &FT_l, &VT_l, &N_l, &V_l, &F_l);
-    search_tree* root_l; 
-    std::vector<search_tree*> leaf_nodes_l;
-    search_tree::leaf_nodes(V_l, FV_l, F_l, &leaf_nodes_l);
-	search_tree::build_tree(V_l, FV_l, &leaf_nodes_l, &root_l);
-	std::cout<<"tree built \n";
+    // float *V_l, *N_l, *VT_l;
+    // int F_l, *FV_l, *FN_l, *FT_l;
+    // ObjFile mesh_light("light_source.obj");
+	// mesh_dino.get_mesh_data(mesh_light, &FV_l, &FN_l, &FT_l, &VT_l, &N_l, &V_l, &F_l);
+    // search_tree* root_l; 
+    // std::vector<search_tree*> leaf_nodes_l;
+    // search_tree::leaf_nodes(V_l, FV_l, F_l, &leaf_nodes_l);
+	// search_tree::build_tree(V_l, FV_l, &leaf_nodes_l, &root_l);
+	// std::cout<<"tree built \n";
 
 
     vector3 eye(0.0f,0.0f,-30.0f);
@@ -70,7 +71,7 @@ int main(int argc, char* argv[] ){
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
     vector3 plane_n(0,0,1);
-    int iterations=10;
+    int iterations=5000;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -87,63 +88,48 @@ int main(int argc, char* argv[] ){
         j=(x/(3))/(myScene.get_x_res());
 
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
-        
-        vector3 ray_direction(s.x() - eye.x(), s.y()-eye.y(), s.z()-eye.z());
+
+
+        float value = 0, alpha = fabs(eye.z()/150.0f);
+        #pragma omp parallel for 
+        for (int l=0; l<iterations;l++){
+            float a = uniform_random_number()*180.0f;
+            float b = uniform_random_number()*180.0f-90.0f;
+            vector3 Si((float)sin(b/360.0f*PI)*sin(a/360.0f*PI), (float)sin(b/360.0f*PI)*cos(a/360.0f*PI),(float)cos(b/360.0f*PI));
+            //   vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*light_length,tangent_v));
+            vector3 ray_direction(Si.x(), Si.y(), Si.z()-s.z());
+            ray_direction.normalize();
+            Ray R(s, ray_direction);
+
+            int min_value = -1, *k ;
+            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
+            bool I = myLight.ray_intersection(R, light_upper, light_lower);
+            if((I!=0)&&(min_value==-1)){
+                #pragma omp critical
+                value= value+1.0f;
+            }
+            else if((min_value==-1)&&(I==0)){
+                #pragma omp critical
+                value = value+0.5f;
+            }
+            else if((min_value!=1)&&(I==1)){
+                #pragma omp critical
+                value = value+alpha;
+            }
+            else{
+               #pragma omp critical
+                value = value; 
+            }
+            
+            delete[] k;
+
+        }
+        vector3 ray_direction(centre.x() - s.x(), centre.y()-s.y(), centre.z()-s.z());
         ray_direction.normalize();
-        Ray R(eye, ray_direction);
-   
-        bool I = myLight.ray_intersection(R, light_upper, light_lower);
-        
 
-
-    //     float value = 0, alpha = fabs(eye.z()/150.0f);
-    //     #pragma omp parallel for 
-    //     for (int l=0; l<iterations;l++){
-    //         float a = uniform_random_number();
-    //         float b = uniform_random_number();
-    //         vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*light_length,tangent_v));
-    //         vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-            
-    //         ray_direction.normalize();
-    //         Ray R(s, ray_direction);
-
-    //         int min_value = -1, *k ;
-    //         float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-    //         if(min_value !=-1){
-    //             #pragma omp critical
-    //             value= value+alpha;
-    //         }
-    //         else{
-    //             #pragma omp critical
-    //             value = value+1;
-    //         }
-            
-    //         delete[] k;
-
-    //     }
-    //     vector3 ray_direction(centre.x() - s.x(), centre.y()-s.y(), centre.z()-s.z());
-    //     ray_direction.normalize();
-
-    // //  if(I==0){
-    //     img[x]= value*190.0f/iterations;
-    //     img[x+1]= value*120.0f/iterations;
-    //     img[x+2]= value*45.0f/iterations;
-        // }
-        // else{
-        //     img[x]= value*255.0f/iterations;
-        //     img[x+1]= I*value*255.0f/iterations;
-        //     img[x+2]= I*value*255.0f/iterations;
-        // }
-        if (I==0){
-            img[x]=255;
-            img[x+1]=0;
-            img[x+2]=0;
-        }
-        else{
-               img[x]=255;
-            img[x+1]=255;
-            img[x+2]=255;
-        }
+        img[x]= value*190.0f/iterations;
+        img[x+1]= value*120.0f/iterations;
+        img[x+2]= value*45.0f/iterations;
 
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
@@ -162,8 +148,8 @@ int main(int argc, char* argv[] ){
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-    ObjFile::clean_up(V_l,N_l, VT_l, FV_l, FN_l, FT_l);
-    search_tree::delete_tree(root_l);
+    // ObjFile::clean_up(V_l,N_l, VT_l, FV_l, FN_l, FT_l);
+    // search_tree::delete_tree(root_l);
     delete [] img;
 
     return 0;

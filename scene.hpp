@@ -86,6 +86,7 @@ class light{ //assuming square light
        
     private:
         vector3 centre;
+        vector3 direction;
         float x_min;
         float x_max;
         float y_min;
