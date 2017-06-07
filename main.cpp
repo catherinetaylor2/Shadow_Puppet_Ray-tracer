@@ -48,30 +48,18 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(V, FV, &leaf_nodes, &root);
 	std::cout<<"tree built \n";
 
-//light mesh
-    // float *V_l, *N_l, *VT_l;
-    // int F_l, *FV_l, *FN_l, *FT_l;
-    // ObjFile mesh_light("light_source.obj");
-	// mesh_dino.get_mesh_data(mesh_light, &FV_l, &FN_l, &FT_l, &VT_l, &N_l, &V_l, &F_l);
-    // search_tree* root_l; 
-    // std::vector<search_tree*> leaf_nodes_l;
-    // search_tree::leaf_nodes(V_l, FV_l, F_l, &leaf_nodes_l);
-	// search_tree::build_tree(V_l, FV_l, &leaf_nodes_l, &root_l);
-	// std::cout<<"tree built \n";
-
-
     vector3 eye(0.0f,0.0f,-30.0f);
     vector3 lookat(0.0f,0.0f,1.0f);
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
     float light_length = 10.0f,I;
-    light myLight(-light_length, 60.0f, 1.0f);
+    light myLight(light_length, 75.0f, 1.0f);
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
-    vector3 plane_n(0,0,1);
-    int iterations=5000;
+    vector3 plane_n(0,0,-1);
+    int iterations=10;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -90,36 +78,28 @@ int main(int argc, char* argv[] ){
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
 
 
-        float value = 0, alpha = fabs(eye.z()/150.0f);
+        float value = 0;// alpha = fabs(eye.z()/150.0f);
         #pragma omp parallel for 
         for (int l=0; l<iterations;l++){
-            float a = uniform_random_number()*180.0f;
-            float b = uniform_random_number()*180.0f-90.0f;
-            vector3 Si((float)sin(b/360.0f*PI)*sin(a/360.0f*PI), (float)sin(b/360.0f*PI)*cos(a/360.0f*PI),(float)cos(b/360.0f*PI));
-            //   vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*light_length,tangent_v));
-            vector3 ray_direction(Si.x(), Si.y(), Si.z()-s.z());
+            float a = uniform_random_number();
+            float b = uniform_random_number();
+            vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*light_length,tangent_v));
+            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
             int min_value = -1, *k ;
             float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-            bool I = myLight.ray_intersection(R, light_upper, light_lower);
-            if((I!=0)&&(min_value==-1)){
+            
+           if(min_value!=-1){
                 #pragma omp critical
-                value= value+1.0f;
-            }
-            else if((min_value==-1)&&(I==0)){
+                value = value;
+           }
+           else{
                 #pragma omp critical
-                value = value+0.5f;
-            }
-            else if((min_value!=1)&&(I==1)){
-                #pragma omp critical
-                value = value+alpha;
-            }
-            else{
-               #pragma omp critical
-                value = value; 
-            }
+                value = value+pow(vector3::dotproduct(plane_n, ray_direction), 10.0f);
+           }
+  
             
             delete[] k;
 
