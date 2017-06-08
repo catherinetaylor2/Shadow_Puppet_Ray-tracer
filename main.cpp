@@ -59,7 +59,7 @@ int main(int argc, char* argv[] ){
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
     vector3 plane_n(0,0,-1);
-    int iterations=10;
+    int iterations=5000;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -68,6 +68,7 @@ int main(int argc, char* argv[] ){
     triangle light_upper(V1, V4, V2);
     triangle light_lower(V3, V4, V1);
     
+  //  std::vector<float> colours; 
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
         bool visibility;
@@ -76,40 +77,77 @@ int main(int argc, char* argv[] ){
         j=(x/(3))/(myScene.get_x_res());
 
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
+       // colours.clear();
 
-
-        float value = 0;// alpha = fabs(eye.z()/150.0f);
-        #pragma omp parallel for 
-        for (int l=0; l<iterations;l++){
+        float value = 0,sum =1;
+        int adaptive = 0, test_iterations = 100 ; 
+        float* colours = new float[test_iterations];
+        
+        for(int z =0; z <test_iterations; z++){
             float a = uniform_random_number();
             float b = uniform_random_number();
             vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*light_length,tangent_v));
             vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+            vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
+            L.normalize();
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
             int min_value = -1, *k ;
             float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-            
+            delete[] k;
+
            if(min_value!=-1){
-                #pragma omp critical
                 value = value;
            }
            else{
-                #pragma omp critical
-                value = value+pow(vector3::dotproduct(plane_n, ray_direction), 10.0f);
+                value = value+pow(vector3::dotproduct(plane_n, L),25.0f);
            }
-  
-            
-            delete[] k;
-
+           colours[z]=value; 
+           
         }
-        vector3 ray_direction(centre.x() - s.x(), centre.y()-s.y(), centre.z()-s.z());
-        ray_direction.normalize();
+        for(int z = 0; z<test_iterations; z++){
+            sum += colours[z]; 
+        }
+        for(int z = 0; z<test_iterations; z++){
+            if((colours)[z]/sum >0.25){
+                adaptive = 1;
+            }
+        }
+        delete [] colours;
 
-        img[x]= value*190.0f/iterations;
-        img[x+1]= value*120.0f/iterations;
-        img[x+2]= value*45.0f/iterations;
+        if(adaptive==1){
+            // alpha = fabs(eye.z()/150.0f);
+            #pragma omp parallel for 
+            for (int l=0; l<iterations;l++){
+                float a = uniform_random_number();
+                float b = uniform_random_number();
+                vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*light_length,tangent_v));
+                vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+                vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
+                L.normalize();
+                ray_direction.normalize();
+                Ray R(s, ray_direction);
+
+                int min_value = -1, *k ;
+                float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
+                delete[] k;
+
+                if(min_value!=-1){
+                    #pragma omp critical
+                    value = value;
+                }
+                else{
+                    #pragma omp critical
+                    value = value+pow(vector3::dotproduct(plane_n, L),25.0f);
+                }      
+               
+            }
+        }
+
+        img[x]= value*190.0f/(float)(iterations*(sum==1)+test_iterations);
+        img[x+1]= value*120.0f/(float)(iterations*(sum==1)+test_iterations);
+        img[x+2]= value*45.0f/(float)(iterations*(sum==1)+test_iterations);
 
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
