@@ -53,7 +53,7 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    float light_length = 2.5f,I;
+    float light_length = 1.0f,I;
     light myLight(light_length, 75.0f, 1.0f);
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[] ){
 
            if(min_value!=-1){
                #pragma omp critical
-                value = value+0.3f;
+                value = value;
            }
            else{
                #pragma omp critical
@@ -138,19 +138,19 @@ int main(int argc, char* argv[] ){
 
                 if(min_value!=-1){
                     #pragma omp critical
-                    value = value+0.3f;
+                    value = value;
                 }
                 else{
                     #pragma omp critical
-                    value = value+pow(vector3::dotproduct(plane_n, L),30.0f);
+                    value = value+pow(vector3::dotproduct(plane_n, L),30.0f) ;
                 }      
                
             }
         }
-
-        img[x]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+1]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+2]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        float a = 0;//-10 + 20*uniform_random_number();
+        img[x]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+1]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+2]= a+value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
 
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
