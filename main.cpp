@@ -40,7 +40,7 @@ int main(int argc, char* argv[] ){
 //Puppet mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("dino_puppet_handle.obj");
+    ObjFile mesh_dino("dino_puppet_handle2.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    float light_length = 10.0f,I;
+    float light_length = 2.5f,I;
     light myLight(light_length, 75.0f, 1.0f);
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
@@ -77,12 +77,11 @@ int main(int argc, char* argv[] ){
         j=(x/(3))/(myScene.get_x_res());
 
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
-       // colours.clear();
 
-        float value = 0,sum =1;
-        int adaptive = 0, test_iterations = 100 ; 
+        float value = 0,sum =0;
+        int adaptive = 0, test_iterations = 30 ; 
         float* colours = new float[test_iterations];
-        
+        #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
             float a = uniform_random_number();
             float b = uniform_random_number();
@@ -98,23 +97,27 @@ int main(int argc, char* argv[] ){
             delete[] k;
 
            if(min_value!=-1){
-                value = value;
+               #pragma omp critical
+                value = value+0.3f;
            }
            else{
-                value = value+pow(vector3::dotproduct(plane_n, L),25.0f);
+               #pragma omp critical
+                value = value+pow(vector3::dotproduct(plane_n, L),30.0f);
            }
            colours[z]=value; 
            
         }
+
         for(int z = 0; z<test_iterations; z++){
             sum += colours[z]; 
         }
         for(int z = 0; z<test_iterations; z++){
-            if((colours)[z]/sum >0.25){
+            if(((colours)[z]/sum >0.05)&&(sum>0.000001f)){
                 adaptive = 1;
             }
         }
         delete [] colours;
+      
 
         if(adaptive==1){
             // alpha = fabs(eye.z()/150.0f);
@@ -135,19 +138,19 @@ int main(int argc, char* argv[] ){
 
                 if(min_value!=-1){
                     #pragma omp critical
-                    value = value;
+                    value = value+0.3f;
                 }
                 else{
                     #pragma omp critical
-                    value = value+pow(vector3::dotproduct(plane_n, L),25.0f);
+                    value = value+pow(vector3::dotproduct(plane_n, L),30.0f);
                 }      
                
             }
         }
 
-        img[x]= value*190.0f/(float)(iterations*(sum==1)+test_iterations);
-        img[x+1]= value*120.0f/(float)(iterations*(sum==1)+test_iterations);
-        img[x+2]= value*45.0f/(float)(iterations*(sum==1)+test_iterations);
+        img[x]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+1]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+2]= value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
 
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
