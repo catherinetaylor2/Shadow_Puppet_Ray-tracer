@@ -21,9 +21,9 @@
 #define infinity FLT_MAX;
 #define PI 3.141592654f
 
-double uniform_random_number(void){
-    return rand()/double(RAND_MAX);
-}
+// double uniform_random_number(void){
+//     return rand()/double(RAND_MAX);
+// }
 
 int main(int argc, char* argv[] ){
 
@@ -64,9 +64,6 @@ int main(int argc, char* argv[] ){
     vector3 c(0.0f, 0.0f,75.0f);
     sphere_light sphereLight(c, 15.0f);
 
-    vector3 centre = myLight.get_centre();
-    vector3 tangent_v(0,1,0);
-    vector3 tangent_u(1,0,0);
     vector3 plane_n(0,0,-1);
     int iterations=10;
 
@@ -76,8 +73,7 @@ int main(int argc, char* argv[] ){
     vector3 V4(myLight.get_xmax(), myLight.get_ymax(), myLight.get_z());
     triangle light_upper(V1, V4, V2);
     triangle light_lower(V3, V4, V1);
-    
-  //  std::vector<float> colours; 
+     
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
         bool visibility;
@@ -92,19 +88,14 @@ int main(int argc, char* argv[] ){
         float* colours = new float[test_iterations];
         #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
-            float a = uniform_random_number();
-            float b = uniform_random_number();
-            vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*light_length,tangent_v));
+            vector3 Si = myLight.point_on_source();
             vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
             vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
             L.normalize();
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
-            // float a = uniform_random_number()*270.0f; 
-            // float b = uniform_random_number()*90.0f+90.0f; 
-            // vector3 Si((float)sphereLight.get_radius()*sin(b/180.0f*PI)*sin(a/180.0f*PI)+sphereLight.get_centre().x(), (float)sphereLight.get_radius()*sin(b/180.0f*PI)*cos(a/180.0f*PI)+sphereLight.get_centre().y(),(float)sphereLight.get_radius()*cos(b/180.0f*PI)+sphereLight.get_centre().z());
-    
+           //vector3 Si = sphereLight.point_on_source();
             // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
             // light_normal.normalize();
             // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
@@ -137,26 +128,20 @@ int main(int argc, char* argv[] ){
                 adaptive = 1;
             }
         }
-        delete [] colours;
-      
+        delete [] colours;      
 
         if(adaptive==1){
-            // alpha = fabs(eye.z()/150.0f);
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
-                float a = uniform_random_number();
-                float b = uniform_random_number();
-                vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*light_length,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*light_length,tangent_v));
+                vector3 Si = myLight.point_on_source();
                 vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
                 vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
                 L.normalize();
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-            // float a = uniform_random_number()*270.0f; 
-            // float b = uniform_random_number()*90.0f+90.0f;
-            // vector3 Si((float)sphereLight.get_radius()*sin(b/180.0f*PI)*sin(a/180.0f*PI)+sphereLight.get_centre().x(), (float)sphereLight.get_radius()*sin(b/180.0f*PI)*cos(a/180.0f*PI)+sphereLight.get_centre().y(),(float)sphereLight.get_radius()*cos(b/180.0f*PI)+sphereLight.get_centre().z());
-            // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
+            //vector3 Si = sphereLight.point_on_source();
+            //vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
             // light_normal.normalize();
             // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
             // L.normalize();
@@ -180,10 +165,6 @@ int main(int argc, char* argv[] ){
             }
         }
      
-        float a = 0;//-10 + 20*uniform_random_number();
-        // img[x]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        // img[x+1]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        // img[x+2]= a+value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
         img[x]=data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
         img[x+1]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
         img[x+2]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
@@ -205,8 +186,6 @@ int main(int argc, char* argv[] ){
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-    // ObjFile::clean_up(V_l,N_l, VT_l, FV_l, FN_l, FT_l);
-    // search_tree::delete_tree(root_l);
     delete [] img;
     delete [] data;
 

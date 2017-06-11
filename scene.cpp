@@ -6,6 +6,10 @@
 
 #define PI 3.141592654f
 
+double uniform_random_number(void){
+    return rand()/double(RAND_MAX);
+}
+
 scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 origin, vector3 lookat, vector3 lookup){
     x_res = xres;
     y_res= yres;
@@ -54,8 +58,22 @@ float light::DiffuseValue( vector3 normal, vector3 light_direction){
         return 0;
     }
 }
+vector3 light::point_on_source(void){
+    float a = uniform_random_number();
+    float b = uniform_random_number();
+    vector3 tangent_v(0,1,0);
+    vector3 tangent_u(1,0,0);
+    vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*x_min,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*x_max,tangent_v));
+    return Si;
+}
    
 sphere_light::sphere_light(vector3 sphere_centre, float sphere_radius){
     centre.setValue(sphere_centre.x(), sphere_centre.y(), sphere_centre.z());
     radius = sphere_radius;
 } 
+vector3 sphere_light::point_on_source(void){
+    float a = uniform_random_number()*270.0f; 
+    float b = uniform_random_number()*90.0f+90.0f; 
+    vector3 Si((float)radius*sin(b/180.0f*PI)*sin(a/180.0f*PI)+centre.x(), (float)radius*sin(b/180.0f*PI)*cos(a/180.0f*PI)+centre.y(),(float)radius*cos(b/180.0f*PI)+centre.z());
+    return Si;
+}

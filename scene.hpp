@@ -83,6 +83,7 @@ class light{ //assuming square light
         }
         bool ray_intersection(Ray R, triangle upper, triangle lower);
         static float DiffuseValue( vector3 normal, vector3 light_direction);
+        vector3 point_on_source(void);
        
     private:
         vector3 centre;
@@ -104,6 +105,7 @@ class sphere_light{ //spherical light source
         float get_radius(void){
             return radius;
         }
+        vector3 point_on_source(void);
     private:
         vector3 centre;
         float radius;
