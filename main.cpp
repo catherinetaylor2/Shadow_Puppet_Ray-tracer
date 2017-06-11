@@ -27,6 +27,11 @@ double uniform_random_number(void){
 
 int main(int argc, char* argv[] ){
 
+    unsigned char * data;
+	int texture_width, texture_height;
+	data = readBMP("sheet.bmp", &texture_width, &texture_height);
+    std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
+
     int width, height;
 	if(argc>1){
 		width = atoi(argv[1]);
@@ -59,7 +64,7 @@ int main(int argc, char* argv[] ){
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
     vector3 plane_n(0,0,-1);
-    int iterations=5000;
+    int iterations=10;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -98,7 +103,7 @@ int main(int argc, char* argv[] ){
 
            if(min_value!=-1){
                #pragma omp critical
-                value = value;
+                value = value+0.05f;
            }
            else{
                #pragma omp critical
@@ -112,7 +117,7 @@ int main(int argc, char* argv[] ){
             sum += colours[z]; 
         }
         for(int z = 0; z<test_iterations; z++){
-            if(((colours)[z]/sum >0.05)&&(sum>0.000001f)){
+            if(((colours)[z]/sum >0.05)&&(sum>0)){
                 adaptive = 1;
             }
         }
@@ -138,7 +143,7 @@ int main(int argc, char* argv[] ){
 
                 if(min_value!=-1){
                     #pragma omp critical
-                    value = value;
+                    value = value+0.05f;
                 }
                 else{
                     #pragma omp critical
@@ -147,10 +152,14 @@ int main(int argc, char* argv[] ){
                
             }
         }
+     
         float a = 0;//-10 + 20*uniform_random_number();
-        img[x]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+1]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+2]= a+value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        // img[x]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        // img[x+1]=a+ value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        // img[x+2]= a+value*255.0f/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x]=data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+1]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        img[x+2]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
 
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
@@ -172,6 +181,7 @@ int main(int argc, char* argv[] ){
     // ObjFile::clean_up(V_l,N_l, VT_l, FV_l, FN_l, FT_l);
     // search_tree::delete_tree(root_l);
     delete [] img;
+    delete [] data;
 
     return 0;
 }
