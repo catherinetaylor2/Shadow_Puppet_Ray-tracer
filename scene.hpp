@@ -95,4 +95,19 @@ class light{ //assuming square light
         float illumination;
 
 };
+class sphere_light{ //spherical light source
+    public:
+        sphere_light(vector3 sphere_centre,float sphere_radius);
+        vector3 get_centre(void){
+            return centre;
+        }
+        float get_radius(void){
+            return radius;
+        }
+    private:
+        vector3 centre;
+        float radius;
+        float illumination;
+
+};
 #endif

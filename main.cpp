@@ -60,6 +60,10 @@ int main(int argc, char* argv[] ){
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
     float light_length = 1.0f,I;
     light myLight(light_length, 75.0f, 1.0f);
+
+    vector3 c(0.0f, 0.0f,75.0f);
+    sphere_light sphereLight(c, 15.0f);
+
     vector3 centre = myLight.get_centre();
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
@@ -84,7 +88,7 @@ int main(int argc, char* argv[] ){
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
 
         float value = 0,sum =0;
-        int adaptive = 0, test_iterations = 30 ; 
+        int adaptive = 0, test_iterations = 25 ; 
         float* colours = new float[test_iterations];
         #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
@@ -97,17 +101,29 @@ int main(int argc, char* argv[] ){
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
+            // float a = uniform_random_number()*270.0f; 
+            // float b = uniform_random_number()*90.0f+90.0f; 
+            // vector3 Si((float)sphereLight.get_radius()*sin(b/180.0f*PI)*sin(a/180.0f*PI)+sphereLight.get_centre().x(), (float)sphereLight.get_radius()*sin(b/180.0f*PI)*cos(a/180.0f*PI)+sphereLight.get_centre().y(),(float)sphereLight.get_radius()*cos(b/180.0f*PI)+sphereLight.get_centre().z());
+    
+            // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
+            // light_normal.normalize();
+            // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
+            // L.normalize();
+            // vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+            // ray_direction.normalize();
+            // Ray R(s, ray_direction);
+
             int min_value = -1, *k ;
             float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
             delete[] k;
 
            if(min_value!=-1){
                #pragma omp critical
-                value = value+0.05f;
+                value = value+0.1f;
            }
            else{
                #pragma omp critical
-                value = value+pow(vector3::dotproduct(plane_n, L),30.0f);
+                value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f);
            }
            colours[z]=value; 
            
@@ -137,17 +153,28 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
+            // float a = uniform_random_number()*270.0f; 
+            // float b = uniform_random_number()*90.0f+90.0f;
+            // vector3 Si((float)sphereLight.get_radius()*sin(b/180.0f*PI)*sin(a/180.0f*PI)+sphereLight.get_centre().x(), (float)sphereLight.get_radius()*sin(b/180.0f*PI)*cos(a/180.0f*PI)+sphereLight.get_centre().y(),(float)sphereLight.get_radius()*cos(b/180.0f*PI)+sphereLight.get_centre().z());
+            // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
+            // light_normal.normalize();
+            // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
+            // L.normalize();
+            // vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+            // ray_direction.normalize();
+            // Ray R(s, ray_direction);
+
                 int min_value = -1, *k ;
                 float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
                 delete[] k;
 
                 if(min_value!=-1){
                     #pragma omp critical
-                    value = value+0.05f;
+                    value = value+0.1f;
                 }
                 else{
                     #pragma omp critical
-                    value = value+pow(vector3::dotproduct(plane_n, L),30.0f) ;
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f) ;
                 }      
                
             }

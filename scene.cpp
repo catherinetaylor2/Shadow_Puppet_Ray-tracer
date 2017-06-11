@@ -55,3 +55,7 @@ float light::DiffuseValue( vector3 normal, vector3 light_direction){
     }
 }
    
+sphere_light::sphere_light(vector3 sphere_centre, float sphere_radius){
+    centre.setValue(sphere_centre.x(), sphere_centre.y(), sphere_centre.z());
+    radius = sphere_radius;
+} 
