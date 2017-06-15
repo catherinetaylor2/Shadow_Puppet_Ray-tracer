@@ -106,6 +106,7 @@ class sphere_light{ //spherical light source
             return radius;
         }
         vector3 point_on_source(void);
+        float intensity(vector3 point);
     private:
         vector3 centre;
         float radius;

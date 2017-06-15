@@ -75,5 +75,18 @@ vector3 sphere_light::point_on_source(void){
     float a = uniform_random_number()*270.0f; 
     float b = uniform_random_number()*90.0f+90.0f; 
     vector3 Si((float)radius*sin(b/180.0f*PI)*sin(a/180.0f*PI)+centre.x(), (float)radius*sin(b/180.0f*PI)*cos(a/180.0f*PI)+centre.y(),(float)radius*cos(b/180.0f*PI)+centre.z());
+   
     return Si;
+}
+
+float sphere_light::intensity(vector3 point){
+    vector3 diff = vector3::vec_add(centre, vector3::vec_scal_mult(-1, point));
+    float min_diff = (centre.z()-point.z())*(centre.z()-point.z());
+
+    float d = abs(vector3::dotproduct(diff, diff))/min_diff;
+
+
+    
+    //std::cout<<35500.0f/(d*4.0f*PI)<<"\n";
+    return 10.0f/(d*4.0f*PI);
 }

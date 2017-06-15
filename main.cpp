@@ -58,14 +58,14 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    float light_length = 1.0f,I;
-    light myLight(light_length, 75.0f, 1.0f);
+    float light_length = 0.25f,I;
+    light myLight(light_length, 100.0f, 1.0f);
 
-    vector3 c(0.0f, 0.0f,75.0f);
-    sphere_light sphereLight(c, 15.0f);
+    vector3 c(0.0f, 5.0f,50.0f);
+    sphere_light sphereLight(c, 4.0f);
 
     vector3 plane_n(0,0,-1);
-    int iterations=10;
+    int iterations=1000;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -84,6 +84,7 @@ int main(int argc, char* argv[] ){
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
 
         float value = 0,sum =0;
+        float value_rgb = 0;
         int adaptive = 0, test_iterations = 25 ; 
         float* colours = new float[test_iterations];
         #pragma omp parallel for
@@ -95,26 +96,37 @@ int main(int argc, char* argv[] ){
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
-           //vector3 Si = sphereLight.point_on_source();
+            vector3 Sil = sphereLight.point_on_source();
             // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
             // light_normal.normalize();
-            // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
-            // L.normalize();
-            // vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
-            // ray_direction.normalize();
-            // Ray R(s, ray_direction);
+            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            Ll.normalize();
+            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
+            ray_directionl.normalize();
+            Ray Rl(s, ray_directionl);
 
-            int min_value = -1, *k ;
-            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
+
+            int min_value = -1, *k;
+            float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
             delete[] k;
+            int min_value2 = -1, *k2;
+            float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
+            delete[] k2;
 
-           if(min_value!=-1){
-               #pragma omp critical
-                value = value+0.1f;
+          if(min_value2!=-1){              
+            if(min_value!=-1){
+                    #pragma omp critical
+                    value = value+0.3f;
+            }
+            else{
+                value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
+            }
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f);
+                value = value+1.5*pow(vector3::dotproduct(plane_n, L),40.0f);
+                #pragma omp critical
+                value_rgb = value_rgb ;              
            }
            colours[z]=value; 
            
@@ -140,35 +152,63 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-            //vector3 Si = sphereLight.point_on_source();
-            //vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
+
+            vector3 Sil = sphereLight.point_on_source();
+            // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
             // light_normal.normalize();
-            // vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
-            // L.normalize();
-            // vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            Ll.normalize();
+            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
+            ray_directionl.normalize();
+            Ray Rl(s, ray_directionl);
+
+            // vector3 ray_direction(c.x() - s.x(), c.y()-s.y(), c.z()-s.z());
             // ray_direction.normalize();
             // Ray R(s, ray_direction);
 
-                int min_value = -1, *k ;
-                float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
+                int min_value = -1, *k , min_value2 = -1, *k2 ;
+                float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
                 delete[] k;
-
-                if(min_value!=-1){
-                    #pragma omp critical
-                    value = value+0.1f;
+                float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
+                delete[] k2;
+        
+                
+                if(min_value2!=-1){
+                    if(min_value!=-1){
+                            #pragma omp critical
+                            value = value+0.3f;
+                        }
+                        else{
+                            value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
+                        }
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f) ;
-                }      
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),40.0f) ;
+                    #pragma omp critical
+                    value_rgb = value_rgb+0.0f;
+                }    
                
             }
         }
-     
-        img[x]=data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+1]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        img[x+2]= data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
 
+
+        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//+30*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        if(R>255.0f){
+            R = 255.0f;
+        }
+        if(G>255.0f){
+            G=255.0f;
+        }
+        if(B>255.0f){
+            B=255.0f;
+        }
+        img[x]=R;
+        img[x+1]= G;
+        img[x+2]=B ;
+  
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
     BITMAP_File_Header file_header;
@@ -188,6 +228,8 @@ int main(int argc, char* argv[] ){
     search_tree::delete_tree(root);
     delete [] img;
     delete [] data;
+
+
 
     return 0;
 }
