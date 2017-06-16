@@ -60,12 +60,13 @@ int main(int argc, char* argv[] ){
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
     float light_length = 0.25f,I;
     light myLight(light_length, 100.0f, 1.0f);
+    light light2(5.0f, 50.0f,1.0f);
 
     vector3 c(0.0f, 5.0f,50.0f);
     sphere_light sphereLight(c, 4.0f);
 
     vector3 plane_n(0,0,-1);
-    int iterations=1000;
+    int iterations=10;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -90,18 +91,25 @@ int main(int argc, char* argv[] ){
         #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
             vector3 Si = myLight.point_on_source();
-            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
             vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
             L.normalize();
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
-            vector3 Sil = sphereLight.point_on_source();
+            // vector3 Sil = sphereLight.point_on_source();
             // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
             // light_normal.normalize();
+            // vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            // Ll.normalize();
+            // vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
+            // ray_directionl.normalize();
+            // Ray Rl(s, ray_directionl);
+
+            vector3 Sil =light2.point_on_source();
+            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
             vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
             Ll.normalize();
-            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
             ray_directionl.normalize();
             Ray Rl(s, ray_directionl);
 
@@ -116,7 +124,7 @@ int main(int argc, char* argv[] ){
           if(min_value2!=-1){              
             if(min_value!=-1){
                     #pragma omp critical
-                    value = value+0.3f;
+                    value = value+0.2f;
             }
             else{
                 value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
@@ -124,7 +132,7 @@ int main(int argc, char* argv[] ){
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, L),40.0f);
+                value = value+1.5*pow(vector3::dotproduct(plane_n, L),50.0f);
                 #pragma omp critical
                 value_rgb = value_rgb ;              
            }
@@ -146,19 +154,26 @@ int main(int argc, char* argv[] ){
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
                 vector3 Si = myLight.point_on_source();
-                vector3 ray_direction(Si.x()-s.x(), Si.y()-s.z(), Si.z()-s.z());
+                vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
                 vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
                 L.normalize();
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
 
-            vector3 Sil = sphereLight.point_on_source();
-            // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
-            // light_normal.normalize();
+            // vector3 Sil = sphereLight.point_on_source();
+            // // vector3 light_normal(Si.x()-sphereLight.get_centre().x(), Si.y()-sphereLight.get_centre().y(),Si.z()-sphereLight.get_centre().z());
+            // // light_normal.normalize();
+            // vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            // Ll.normalize();
+            // vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
+            // ray_directionl.normalize();
+            // Ray Rl(s, ray_directionl);
+
+            vector3 Sil =light2.point_on_source();
+            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
             vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
             Ll.normalize();
-            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.z(), Sil.z()-s.z());
             ray_directionl.normalize();
             Ray Rl(s, ray_directionl);
 
@@ -176,7 +191,7 @@ int main(int argc, char* argv[] ){
                 if(min_value2!=-1){
                     if(min_value!=-1){
                             #pragma omp critical
-                            value = value+0.3f;
+                            value = value+0.2f;
                         }
                         else{
                             value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
@@ -184,7 +199,7 @@ int main(int argc, char* argv[] ){
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),40.0f) ;
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),50.0f) ;
                     #pragma omp critical
                     value_rgb = value_rgb+0.0f;
                 }    
