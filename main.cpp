@@ -29,7 +29,7 @@ int main(int argc, char* argv[] ){
 
     unsigned char * data;
 	int texture_width, texture_height;
-	data = readBMP("sheet.bmp", &texture_width, &texture_height);
+	data = readBMP("sheet3.bmp", &texture_width, &texture_height);
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
     int width, height;
@@ -58,9 +58,9 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
-    float light_length = 0.25f,I;
+    float light_length = 0.15f,I;
     light myLight(light_length, 100.0f, 1.0f);
-    light light2(5.0f, 50.0f,1.0f);
+    light light2(4.0f, 45.0f,1.0f);
 
     vector3 c(0.0f, 5.0f,50.0f);
     sphere_light sphereLight(c, 4.0f);
@@ -124,15 +124,15 @@ int main(int argc, char* argv[] ){
           if(min_value2!=-1){              
             if(min_value!=-1){
                     #pragma omp critical
-                    value = value+0.2f;
+                    value = value+0.3f;
             }
             else{
-                value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
+                value = value+1.4*pow(vector3::dotproduct(plane_n, L),30.0f);
             }
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, L),50.0f);
+                value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f;
                 #pragma omp critical
                 value_rgb = value_rgb ;              
            }
@@ -191,15 +191,15 @@ int main(int argc, char* argv[] ){
                 if(min_value2!=-1){
                     if(min_value!=-1){
                             #pragma omp critical
-                            value = value+0.2f;
+                            value = value+0.3f;
                         }
                         else{
-                            value = value+1.2*pow(vector3::dotproduct(plane_n, L),30.0f);
+                            value = value+1.4*pow(vector3::dotproduct(plane_n, L),30.0f);
                         }
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),50.0f) ;
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f ;
                     #pragma omp critical
                     value_rgb = value_rgb+0.0f;
                 }    
@@ -209,8 +209,8 @@ int main(int argc, char* argv[] ){
 
 
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//+30*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        float G = 221.0f/255.0f*data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        float B = 204.0f/255.0f*data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//+30*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
         if(R>255.0f){
             R = 255.0f;
         }
