@@ -2,6 +2,7 @@
 #define readObj_hpp
 
 #include <string>
+#include "vec3.hpp"
 
 class ObjFile{
     public:
@@ -21,6 +22,8 @@ class ObjFile{
             return fn;
         }
         void get_mesh_data(ObjFile mesh, int** face_vertex, int** face_normals, int** face_textures, float** texture_coords, float** normals, float** vertices, int* number_of_faces);
+        void get_boundary_edges(int* face_vertex, int** edges, int number_of_faces);
+        vector3 closet_edge_point(float* vertices,int* edges, vector3 point);
     private:
 		std::string fn;
         int number_of_normals;

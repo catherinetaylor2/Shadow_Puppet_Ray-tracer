@@ -53,20 +53,24 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(V, FV, &leaf_nodes, &root);
 	std::cout<<"tree built \n";
 
-    vector3 eye(0.0f,0.0f,-30.0f);
+    int* edges;
+    mesh_dino.get_boundary_edges(FV, &edges, F);
+
+    vector3 eye(0.0f,0.0f,-75.0f);
     vector3 lookat(0.0f,0.0f,1.0f);
     vector3 lookup(0.0f,1.0f,-30.0f);
 
-    scene myScene(width, height, 90.0f, 40.0f, eye, lookat, lookup);
+    scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
     float light_length = 0.15f,I;
     light myLight(light_length, 100.0f, 1.0f);
-    light light2(4.0f, 45.0f,1.0f);
+    light light2(4.0f, 35.0f,1.0f);
 
     vector3 c(0.0f, 5.0f,50.0f);
     sphere_light sphereLight(c, 4.0f);
 
     vector3 plane_n(0,0,-1);
-    int iterations=1000;
+    vector3 puppet(0,0,1);
+    int iterations=10;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -106,30 +110,43 @@ int main(int argc, char* argv[] ){
             // ray_directionl.normalize();
             // Ray Rl(s, ray_directionl);
 
-            vector3 Sil =light2.point_on_source();
-            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
-            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
-            Ll.normalize();
-            ray_directionl.normalize();
-            Ray Rl(s, ray_directionl);
+            // vector3 Sil =light2.point_on_source();
+            // vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
+            // vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            // Ll.normalize();
+            // ray_directionl.normalize();
+            // Ray Rl(s, ray_directionl);
 
 
             int min_value = -1, *k;
-            float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
+            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
             delete[] k;
-            int min_value2 = -1, *k2;
-            float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
-            delete[] k2;
+            // int min_value2 = -1, *k2;
+            // float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
+            // delete[] k2;
 
-          if(min_value2!=-1){              
+        //   if(min_value2!=-1){              
             if(min_value!=-1){
+                //     vector3 edge_point = mesh_dino.closet_edge_point(V, edges, s);
+                //     vector3 dir = vector3::vec_add(s, vector3::vec_scal_mult(-1, edge_point));
+                //     dir.normalize();
+                //     float d =  acos(fabs(vector3::dotproduct(puppet, dir)));
+                // std::cout<<"d "<<d<<"\n";
+
+                //     if(d>PI/15.0f){
+                //         std::cout<<"line 137 \n";
+                //         #pragma omp critical
+                //         value = value +1.65*pow(1-vector3::dotproduct(plane_n, L),80.0f);
+                //     }
+                //     else{
                     #pragma omp critical
-                    value = value+0.2f;
+                    value = value+0.5*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
+                 //   }
             }
-            else{
-                value = value+1.25*pow(vector3::dotproduct(plane_n, L),30.0f);
-            }
-           }
+        //     else{
+        //         value = value+1.65*pow(vector3::dotproduct(plane_n, L),80.0f);
+        //     }
+        //    }
            else{
                #pragma omp critical
                 value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f;
@@ -170,33 +187,45 @@ int main(int argc, char* argv[] ){
             // ray_directionl.normalize();
             // Ray Rl(s, ray_directionl);
 
-            vector3 Sil =light2.point_on_source();
-            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
-            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
-            Ll.normalize();
-            ray_directionl.normalize();
-            Ray Rl(s, ray_directionl);
+            // vector3 Sil =light2.point_on_source();
+            // vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
+            // vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+            // Ll.normalize();
+            // ray_directionl.normalize();
+            // Ray Rl(s, ray_directionl);
 
             // vector3 ray_direction(c.x() - s.x(), c.y()-s.y(), c.z()-s.z());
             // ray_direction.normalize();
             // Ray R(s, ray_direction);
 
                 int min_value = -1, *k , min_value2 = -1, *k2 ;
-                float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
+                float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
                 delete[] k;
-                float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
-                delete[] k2;
+                // float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);
+                // delete[] k2;
         
                 
-                if(min_value2!=-1){
-                    if(min_value!=-1){
-                            #pragma omp critical
-                            value = value+0.2f;
+                // if(min_value2!=-1){
+                if(min_value!=-1){
+                    // vector3 edge_point = mesh_dino.closet_edge_point(V, edges, s);
+                    // vector3 dir = vector3::vec_add(s, vector3::vec_scal_mult(-1, edge_point));
+                    // dir.normalize();
+                    // float d =  acos(fabs(vector3::dotproduct(puppet, dir)));
+                    // ;
+
+                    // if(d>(PI/15.0f)){
+                    //     #pragma omp critical
+                    //     value = value +1.65*pow(vector3::dotproduct(plane_n, L),80.0f);
+                    // }
+                    // else{
+                    #pragma omp critical
+                    value = value+ 0.5*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f;; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
+                 //  }
                         }
-                        else{
-                            value = value+1.25*pow(vector3::dotproduct(plane_n, L),30.0f);
-                        }
-                }
+                //         else{
+                //             value = value+1.65*pow(vector3::dotproduct(plane_n, L),80.0f);
+                //         }
+                // }
                 else{
                     #pragma omp critical
                     value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f ;
@@ -209,8 +238,8 @@ int main(int argc, char* argv[] ){
 
         //Spherical light data:
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations); //221.0f/255.0f*
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations); //204.0f/255.0f*
+        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*221.0f/255.0f;
+        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*204.0f/255.0f;
         
         // float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
         // float G = 221.0f/255.0f*data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
@@ -248,6 +277,7 @@ int main(int argc, char* argv[] ){
     search_tree::delete_tree(root);
     delete [] img;
     delete [] data;
+    delete [] edges;
 
 
 
