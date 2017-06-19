@@ -66,7 +66,7 @@ int main(int argc, char* argv[] ){
     sphere_light sphereLight(c, 4.0f);
 
     vector3 plane_n(0,0,-1);
-    int iterations=10;
+    int iterations=1000;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -124,10 +124,10 @@ int main(int argc, char* argv[] ){
           if(min_value2!=-1){              
             if(min_value!=-1){
                     #pragma omp critical
-                    value = value+0.3f;
+                    value = value+0.2f;
             }
             else{
-                value = value+1.4*pow(vector3::dotproduct(plane_n, L),30.0f);
+                value = value+1.25*pow(vector3::dotproduct(plane_n, L),30.0f);
             }
            }
            else{
@@ -191,10 +191,10 @@ int main(int argc, char* argv[] ){
                 if(min_value2!=-1){
                     if(min_value!=-1){
                             #pragma omp critical
-                            value = value+0.3f;
+                            value = value+0.2f;
                         }
                         else{
-                            value = value+1.4*pow(vector3::dotproduct(plane_n, L),30.0f);
+                            value = value+1.25*pow(vector3::dotproduct(plane_n, L),30.0f);
                         }
                 }
                 else{
@@ -207,10 +207,15 @@ int main(int argc, char* argv[] ){
             }
         }
 
-
-        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = 221.0f/255.0f*data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
-        float B = 204.0f/255.0f*data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//+30*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        //Spherical light data:
+        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations); //221.0f/255.0f*
+        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations); //204.0f/255.0f*
+        
+        // float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        // float G = 221.0f/255.0f*data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        // float B = 204.0f/255.0f*data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//+30*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
+        
         if(R>255.0f){
             R = 255.0f;
         }
