@@ -63,7 +63,7 @@ int main(int argc, char* argv[] ){
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
     float light_length = 0.15f,I;
     light myLight(light_length, 50.0f, 1.0f);
-    light light2(4.0f, 100.0f,1.0f);
+    light light2(6.0f, 70.0f,1.0f);
 
     vector3 c(0.0f, 45.0f,50.0f);
     sphere_light sphereLight(c, 4.0f);
@@ -144,12 +144,12 @@ int main(int argc, char* argv[] ){
                  //   }
             }
             else{
-                value = value+1.65*pow(vector3::dotproduct(plane_n, L),80.0f);
+                value = value+1.65*pow(vector3::dotproduct(plane_n, Ll),80.0f);
             }
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f;
+                value = value+1.5*pow(vector3::dotproduct(plane_n, Ll),80.0f)+0.4f;
                 #pragma omp critical
                 value_rgb = value_rgb ;              
            }
@@ -223,12 +223,12 @@ int main(int argc, char* argv[] ){
                  //  }
                         }
                         else{
-                            value = value+1.65*pow(vector3::dotproduct(plane_n, L),80.0f);
+                            value = value+1.65*pow(vector3::dotproduct(plane_n, Ll),80.0f);
                         }
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),80.0f)+0.4f ;
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, Ll),80.0f)+0.4f ;
                     #pragma omp critical
                     value_rgb = value_rgb+0.0f;
                 }    
