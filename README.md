@@ -2,7 +2,8 @@
 
 Creating a virtual shadow puppet theatre using monte-carlo ray-tracing for part of my EngD dissertation.
 
-![12th_june_3](https://user-images.githubusercontent.com/25514442/27225907-41541620-5294-11e7-91df-37b1b1fa4178.png)
+![imga](https://user-images.githubusercontent.com/25514442/27341707-e95f92ce-55d5-11e7-8c52-dedff6641219.png)
+
 
 ### Input:
  * Triangular mesh for puppet
