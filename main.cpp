@@ -144,12 +144,12 @@ int main(int argc, char* argv[] ){
                  //   }
             }
             else{
-                value = value+1.65*pow(vector3::dotproduct(plane_n, Ll),80.0f);
+                value = value+1.85*pow(vector3::dotproduct(plane_n, L),30.0f);
             }
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, Ll),80.0f)+0.4f;
+                value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f)+0.4f;
                 #pragma omp critical
                 value_rgb = value_rgb ;              
            }
@@ -223,12 +223,12 @@ int main(int argc, char* argv[] ){
                  //  }
                         }
                         else{
-                            value = value+1.65*pow(vector3::dotproduct(plane_n, Ll),80.0f);
+                            value = value+1.85*pow(vector3::dotproduct(plane_n, L),30.0f);
                         }
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, Ll),80.0f)+0.4f ;
+                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f)+0.4f ;
                     #pragma omp critical
                     value_rgb = value_rgb+0.0f;
                 }    
