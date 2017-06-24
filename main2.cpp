@@ -29,7 +29,7 @@ int main(int argc, char* argv[] ){
 
     unsigned char * data;
 	int texture_width, texture_height;
-	data = readBMP("sheet3.bmp", &texture_width, &texture_height);
+	data = readBMP("sheet6.bmp", &texture_width, &texture_height);
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
     int width, height;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
-    float light_length = 0.5f,I;
+    float light_length = 1.0f,I;
     light myLight(light_length, 50.0f, 1.0f);
     light light2(6.0f, 70.0f,1.0f);
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[] ){
 
     vector3 plane_n(0,0,-1);
     vector3 puppet(0,0,1);
-    
+    int iterations=100;
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -78,9 +78,8 @@ int main(int argc, char* argv[] ){
     vector3 V4(myLight.get_xmax(), myLight.get_ymax(), myLight.get_z());
     triangle light_upper(V1, V4, V2);
     triangle light_lower(V3, V4, V1);
-
-    for(int it = 1; it<2; it = it*10){
-     int iterations=10;//it;
+     
+     for(int it = 175; it<180; it+=25){
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
         bool visibility;
@@ -142,16 +141,16 @@ int main(int argc, char* argv[] ){
                 //     }
                 //     else{
                     #pragma omp critical
-                    value = value+0.3f;//*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
+                    value = value+0.2f;//*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
                  //   }
             }
-            else{
-                value = value+0.95f; //1.85*pow(vector3::dotproduct(plane_n, L),30.0f);
-            }
+           else{
+                value = value+1.2f;//1.7*pow(vector3::dotproduct(plane_n, L), 70.0f);
+           }
            }
            else{
                #pragma omp critical
-                value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f)+0.4f;
+                value = value+(float)it/100.0f*pow(vector3::dotproduct(plane_n, L),10.0f)+0.4f;
                 #pragma omp critical
                 value_rgb = value_rgb ;              
            }
@@ -221,16 +220,16 @@ int main(int argc, char* argv[] ){
                     // }
                     // else{
                     #pragma omp critical
-                    value = value+0.3f;//*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f;; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
+                    value = value+0.2f;//*(1-pow(vector3::dotproduct(plane_n, L),200.0f))+0.2f;; //0.8*(1-pow(vector3::dotproduct(plane_n, L),200.0f));
                  //  }
                         }
-                        else{
-                            value = value+0.95f;//1.85*pow(vector3::dotproduct(plane_n, L),30.0f);
-                        }
+                       else{
+                            value = value+1.2;//1.7*pow(vector3::dotproduct(plane_n, L),70.0f);
+                       }
                 }
                 else{
                     #pragma omp critical
-                    value = value+1.5*pow(vector3::dotproduct(plane_n, L),30.0f)+0.4f ;
+                    value = value+(float)it/100.0f*pow(vector3::dotproduct(plane_n, L),10.0f)+0.3f ;
                     #pragma omp critical
                     value_rgb = value_rgb+0.0f;
                 }    
@@ -238,10 +237,15 @@ int main(int argc, char* argv[] ){
             }
         }
 
-        //Spherical light data:
+        // //Spherical light data:
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*221.0f/255.0f;
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*204.0f/255.0f;
+        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//*221.0f/255.0f;
+        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//*204.0f/255.0f;
+
+        
+        // float R = 255.0f*value/(float)(iterations*(adaptive==1)+test_iterations);
+        // float G = 255.0f*value/(float)(iterations*(adaptive==1)+test_iterations)*221.0f/255.0f;
+        // float B = 255.0f*value/(float)(iterations*(adaptive==1)+test_iterations)*204.0f/255.0f;
         
         // float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);//+0*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
         // float G = 221.0f/255.0f*data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//+149*value_rgb/(float)(iterations*(adaptive==1)+test_iterations);
@@ -261,7 +265,7 @@ int main(int argc, char* argv[] ){
         img[x+2]=B ;
   
     }
-    std::ofstream image2("puppet"+std::to_string(it)+".bmp", std::ios::out| std::ios::binary); 
+    std::ofstream image2("puppet"+ std::to_string(it)+ ".bmp", std::ios::out| std::ios::binary); 
     BITMAP_File_Header file_header;
     BITMAP_Info_Header info_header;
     fill_bitmap_headers(&file_header, &info_header,  width, height);
@@ -274,10 +278,10 @@ int main(int argc, char* argv[] ){
         }
     }
     image2.close();
+    delete [] img;
+    std::cout<<"done \n";
+     }
 
-
-   delete [] img;
-    }
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
   //  delete [] img;
