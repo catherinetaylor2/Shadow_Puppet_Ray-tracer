@@ -63,7 +63,7 @@ int main(int argc, char* argv[] ){
     vector3 lookup(0.0f,1.0f,-30.0f);
 
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
-    float inner_light_length = 0.25f,I;
+    float inner_light_length = 0.1f,I;
     light inner_light(inner_light_length, 50.0f, 1.0f);
     float outer_light_length = 7.5f;
     light outer_light(outer_light_length, 70.0f,1.0f);
@@ -129,14 +129,11 @@ int main(int argc, char* argv[] ){
                 }
                 else{
                     int triangle = k2[min_value2+1];
-                    //std::cout<<triangle<<"\n";
                     float* colour = new float[3];
                     triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                   // std::cout<<"line 144 \n";
                     if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
                         #pragma omp critical
-                        value = value+1.0f;
-                        
+                        value = value+1.0f;                        
                     }
                     else{
                         #pragma omp critical
@@ -146,14 +143,13 @@ int main(int argc, char* argv[] ){
                     delete[] k2;
                 }
             }
-        else{
-            #pragma omp critical
-            value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-            #pragma omp critical
-            value_rgb = value_rgb ;              
-        }
-        colours[z]=value; 
-           
+            else{
+                #pragma omp critical
+                value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
+                #pragma omp critical
+                value_rgb = value_rgb ;              
+            }
+            colours[z]=value; 
         }
 
         for(int z = 0; z<test_iterations; z++){
@@ -176,72 +172,64 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-
-            vector3 Sil =outer_light.point_on_source();
-            vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
-            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
-            Ll.normalize();
-            ray_directionl.normalize();
-            Ray Rl(s, ray_directionl);
-
+                vector3 Sil =outer_light.point_on_source();
+                vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
+                vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
+                Ll.normalize();
+                ray_directionl.normalize();
+                Ray Rl(s, ray_directionl);
 
                 int min_value = -1, *k , min_value2 = -1, *k2 ;
                 float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
                 float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);       
                 
-  
-            if(min_value2!=-1){              
-                if(min_value!=-1){
-                    int triangle = k[min_value+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, Rl, dino_tex, FT, VT, dino_width, dino_height, &colour); 
+                if(min_value2!=-1){              
+                    if(min_value!=-1){
+                        int triangle = k[min_value+1];
+                        float* colour = new float[3];
+                        triangle::get_texture_value(triangle, FV, V, Rl, dino_tex, FT, VT, dino_width, dino_height, &colour); 
 
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+0.2f;
+                        if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                            #pragma omp critical
+                            value = value+0.2f;
+                        }
+                        else{
+                            #pragma omp critical
+                            value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
+                        }  
+                        delete[] colour;
+                        delete[] k;
                     }
                     else{
-                        #pragma omp critical
-                        value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k;
+                        int triangle = k2[min_value2+1];
+                        float* colour = new float[3];
+                        triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
+                        if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                            #pragma omp critical
+                            value = value+1.0f;     
+                        }
+                        else{
+                            #pragma omp critical
+                            value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
+                        }  
+                        delete[] colour;
+                        delete[] k2;
+                    }
                 }
                 else{
-                    int triangle = k2[min_value2+1];
-                    //std::cout<<triangle<<"\n";
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                   // std::cout<<"line 144 \n";
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+1.0f;
-                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k2;
+                    #pragma omp critical
+                    value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
+                    #pragma omp critical
+                    value_rgb = value_rgb ;              
                 }
             }
-        else{
-            #pragma omp critical
-            value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-            #pragma omp critical
-            value_rgb = value_rgb ;              
-        }
-           
-        }
          }
 
-        // //Spherical light data:
+         //Spherical light data:
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
         float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);//*221.0f/255.0f;
         float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);//*204.0f/255.0f;
 
-        
         if(R>255.0f){
             R = 255.0f;
         }
@@ -253,8 +241,7 @@ int main(int argc, char* argv[] ){
         }
         img[x]=R;
         img[x+1]= G;
-        img[x+2]=B ;
-  
+        img[x+2]=B ;  
     }
     std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
     BITMAP_File_Header file_header;
@@ -269,17 +256,15 @@ int main(int argc, char* argv[] ){
         }
     }
     image2.close();
-    delete [] img;
+
     std::cout<<"done \n";
-   //  }
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-    delete [] dino_tex;
-    delete [] data;
-    delete [] edges;
-
-
+    delete[] dino_tex;
+    delete[] data;
+    delete[] edges;
+    delete[] img;
 
     return 0;
 }
