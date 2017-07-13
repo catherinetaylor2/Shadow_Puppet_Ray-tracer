@@ -3,6 +3,8 @@
 // Created by Catherine Taylor
 //
 // Began May 2017
+//
+//Produces hard shadow puppets
 
 #include <cstdlib>
 #include <fstream>
