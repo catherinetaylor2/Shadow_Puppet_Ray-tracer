@@ -71,8 +71,8 @@ float triangle::ray_triangle_intersection(Ray R){
         for (int z=0; z<(*k)[0]; z++){
             if ((t_values[z]>0)){
                 vector3 xyz = vector3::vec_add( R.get_origin(), vector3::vec_scal_mult(t_values[z],R.get_direction()));
-                if (xyz.z()<t_min){
-                    t_min =xyz.z();//t_values[z];
+                if (t_values[z]<t_min){
+                    t_min =t_values[z];
                     //std::cout<<"t_min"<<t_min<<"\n";
                     *min_value = z;
                 }

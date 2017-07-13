@@ -101,7 +101,6 @@ int main(int argc, char* argv[] ){
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
-
             int min_value = -1, *k;
             float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
             
@@ -110,12 +109,14 @@ int main(int argc, char* argv[] ){
 
                 int triangle = k[min_value+1];
                 float* colour = new float[3];
-                triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour);      
-   
+                triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour);  
+                vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
+                float alpha = fabs(POI.z()-s.z())/100.0f;  
+                   
                 if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
 
                     #pragma omp critical
-                    value = value+0.2f;
+                    value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f);
                 }
                 else{
                     #pragma omp critical
@@ -160,10 +161,14 @@ int main(int argc, char* argv[] ){
                     int triangle = k[min_value+1];
                     float* colour = new float[3];
                     triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
+                    vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
+                    float alpha = fabs(POI.z()-s.z())/100.0f; 
+
 
                     if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
                         #pragma omp critical
-                        value = value+0.2f;
+                        value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f);
+
                     }
                     else{
                         #pragma omp critical
