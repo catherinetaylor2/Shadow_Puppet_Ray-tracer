@@ -32,6 +32,10 @@ int main(int argc, char* argv[] ){
 	data = readBMP("sheet6.bmp", &texture_width, &texture_height);
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
+    unsigned char * dino_tex;
+	int dino_width, dino_height;
+	dino_tex = readBMP("dino_texture.bmp", &dino_width, &dino_height);
+
     int width, height;
 	if(argc>1){
 		width = atoi(argv[1]);
@@ -79,7 +83,8 @@ int main(int argc, char* argv[] ){
     triangle light_upper(V1, V4, V2);
     triangle light_lower(V3, V4, V1);
      
-     for(int it = 175; it<180; it+=25){
+   //  for(int it = 175; it<180; it+=25){
+    int it = 175;
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
         bool visibility;
@@ -280,11 +285,11 @@ int main(int argc, char* argv[] ){
     image2.close();
     delete [] img;
     std::cout<<"done \n";
-     }
+   //  }
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-  //  delete [] img;
+    delete [] dino_tex;
     delete [] data;
     delete [] edges;
 

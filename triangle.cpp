@@ -18,7 +18,7 @@ triangle::triangle(vector3 V1, vector3 V2, vector3 V3){
     plane_constant = vector3::dotproduct(normal, vertex1);
 }
 
-bool triangle::ray_triangle_intersection(Ray R){
+float triangle::ray_triangle_intersection(Ray R){
     float r = vector3::dotproduct(normal, R.get_direction());
     if (fabs(r) < 0.000000001f){
               return 0;
@@ -31,7 +31,9 @@ bool triangle::ray_triangle_intersection(Ray R){
     (vector3::dotproduct(vector3::crossproduct(vector3::vec_add(vertex3, vector3::vec_scal_mult(-1, vertex2)), vector3::vec_add(intersection_point,vector3::vec_scal_mult(-1, vertex2))), normal)>=-0.00001f)&&
     (vector3::dotproduct(vector3::crossproduct(vector3::vec_add(vertex1, vector3::vec_scal_mult(-1, vertex3)), vector3::vec_add(intersection_point, vector3::vec_scal_mult(-1, vertex3))), normal)>=-0.00001f))
     {
+      //   std::cout<<"tt "<<t<<"\n";
     return t;
+   
     }
     return 0;
 }
@@ -63,13 +65,15 @@ bool triangle::ray_triangle_intersection(Ray R){
             vector3 V3(vertices[3*index3], vertices[3*index3+1], vertices[3*index3+2]);
             triangle tri(V1, V2, V3);
             t = tri.ray_triangle_intersection(R);
+         //   std::cout<<"t "<<t<<"\n";
             t_values[z-1]=t;
         }
         for (int z=0; z<(*k)[0]; z++){
             if ((t_values[z]>0)){
                 vector3 xyz = vector3::vec_add( R.get_origin(), vector3::vec_scal_mult(t_values[z],R.get_direction()));
                 if (xyz.z()<t_min){
-                    t_min = xyz.z();
+                    t_min =xyz.z();//t_values[z];
+                    //std::cout<<"t_min"<<t_min<<"\n";
                     *min_value = z;
                 }
             }

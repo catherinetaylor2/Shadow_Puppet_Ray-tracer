@@ -13,7 +13,7 @@ class triangle{
         vector3 get_triangle_normal(void){
             return normal;
         }
-        bool ray_triangle_intersection(Ray R);
+        float ray_triangle_intersection(Ray R);
         static float intersection_point(search_tree* root, float*vertices, Ray R, int* faces, int* min_value, int**k);
     private:
         float plane_constant;
