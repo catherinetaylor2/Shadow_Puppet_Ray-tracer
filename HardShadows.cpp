@@ -24,10 +24,6 @@
 #define infinity FLT_MAX;
 #define PI 3.141592654f
 
-// double uniform_random_number(void){
-//     return rand()/double(RAND_MAX);
-// }
-
 int main(int argc, char* argv[] ){
 
     unsigned char * data;
@@ -73,8 +69,7 @@ int main(int argc, char* argv[] ){
     light myLight(light_length, 50.0f, 1.0f);
 
     vector3 plane_n(0,0,-1);
-    vector3 puppet(0,0,1);
-    
+    vector3 puppet(0,0,1);    
 
     vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
     vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
@@ -148,8 +143,7 @@ int main(int argc, char* argv[] ){
         delete [] colours;      
 
         if(adaptive==1){
-//        std::cout<<"line 224 \n";
-          #pragma omp parallel for 
+            #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
                 vector3 Si = myLight.point_on_source();
                 vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
@@ -161,7 +155,6 @@ int main(int argc, char* argv[] ){
                 int min_value = -1, *k ;
                 float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
                 
-          
                 if(min_value!=-1){
                     
                     int triangle = k[min_value+1];
