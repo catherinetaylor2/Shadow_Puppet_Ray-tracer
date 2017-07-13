@@ -82,3 +82,71 @@ float triangle::ray_triangle_intersection(Ray R){
     }
     return t_min; //value of t when intersection occurs
  }
+
+void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, unsigned char* dino_tex, int* FT, float* VT, int dino_width, int dino_height, float **colour)
+{
+    float denominator;
+
+    
+    int c_m1, c_m2, c_m3, n1, n2, n3;
+    c_m1 = FV[3*triangle_value] -1, c_m2 = FV[3*triangle_value+1]-1, c_m3 = FV[3*triangle_value+2] -1 ;
+    vector3 point1(V[3*c_m1], V[3*c_m1+1], V[3*c_m1+2]);
+    vector3 point2(V[3*c_m2], V[3*c_m2+1], V[3*c_m2+2]);
+    vector3 point3(V[3*c_m3], V[3*c_m3+1], V[3*c_m3+2]);
+    vector3 T = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(-1, point1));
+    vector3 E1 = vector3::vec_add(point2, vector3::vec_scal_mult(-1, point1));
+    vector3 E2 = vector3::vec_add(point3, vector3::vec_scal_mult(-1, point1));
+    denominator = vector3::dotproduct( vector3::crossproduct(R.get_direction(), E2), E1);
+
+    vector3 M (vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.get_direction(), E2), T),vector3::dotproduct( vector3::crossproduct(T, E1), R.get_direction()));
+    vector3 tuv = vector3::vec_scal_mult(1.0f/(float)denominator, M);
+    float *barycentric = new float[3];
+    (barycentric)[0] = 1.0f-(tuv.y()+tuv.z());
+    (barycentric)[1] = tuv.y();
+    (barycentric)[2] = tuv.z();
+
+    int vt1 = FT[3*triangle_value]-1, vt2 = FT[3*triangle_value+1]-1, vt3 = FT[3*triangle_value+2]-1;
+    float vt_1x = VT[2*vt1], vt_1y = VT[2*vt1+1], vt_2x = VT[2*vt2], vt_2y = VT[2*vt2+1], vt_3x = VT[2*vt3], vt_3y = VT[2*vt3+1];
+
+     float u_coord, v_coord, alpha, beta, v12r, v12g, v12b, v34r, v34g, v34b;
+    int v1x,v1y, v2x, v4y;
+    u_coord = (barycentric[0]*vt_1x +barycentric[1]*vt_2x+barycentric[2]*vt_3x)*dino_width;
+    v_coord = (barycentric[0]*vt_1y +barycentric[1]*vt_2y+barycentric[2]*vt_3y)*dino_height;
+    v1x = (int)floor(u_coord);
+    v1y = (int)ceil(v_coord);
+    v2x = (int)ceil(u_coord);
+    v4y = (int)floor(v_coord);
+    if (v1x<0){
+        v1x=0;
+    }
+    if (v2x<0){
+        v2x=0;
+    }
+    if (v1y<0){
+        v1y=0;
+    }
+    if (v4y<0){
+        v4y=0;
+    }
+
+    alpha = (float)(u_coord - (v2x - v1x)*v1x)/(float) (v2x - v1x);
+    beta = (float)(v_coord - (v1y - v4y)*v4y)/(float) (v1y - v4y);
+
+    if (alpha >1){
+        alpha=1;
+    }
+    if(beta>1){
+        beta =1;
+    }
+
+    v12r = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x] +  alpha*dino_tex[v1y*dino_width*3 + 3*v2x];
+    v12g = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x+1] +alpha*dino_tex[v1y*dino_width*3 + 3*v2x+1];
+    v12b = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x+2] +alpha*dino_tex[v1y*dino_width*3 + 3*v2x+2];
+    v34g =  (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x+1] +  alpha*dino_tex[v4y*dino_width*3 + 3*v2x+1];
+    v34r =  (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x] +    alpha*dino_tex[v4y*dino_width*3 + 3*v2x];
+    v34b =  (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x+2] +  alpha*dino_tex[v4y*dino_width*3 + 3*v2x+2];
+
+  (*colour)[0] = (1-beta)*v12r + beta*v34r;
+  (*colour)[1] = (1-beta)*v12g + beta*v34g;
+  (*colour)[2] = (1-beta)*v12b + beta*v34b;
+}
