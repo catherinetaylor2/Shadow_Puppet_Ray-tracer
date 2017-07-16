@@ -187,56 +187,56 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
     vector3 POI = vector3::vec_add(Rl.get_origin(), vector3::vec_scal_mult(t_min,  Rl.get_direction()));  
     float alpha = sqrt(fabs(POI.z()-Rl.get_origin().z())/15.0f); //distance function for level of blending
                    
-            float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);     
-            vector3 POI2 = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
-            float alpha2 = sqrt(fabs(POI2.z()-R.get_origin().z())/15.0f); //distance function for level of blending
+    float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);     
+    vector3 POI2 = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
+    float alpha2 = sqrt(fabs(POI2.z()-R.get_origin().z())/15.0f); //distance function for level of blending
    
-            if(min_value2!=-1){              
-                if(min_value!=-1){
-                    int triangle = k[min_value+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, Rl, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
-                    int triangle2 = k2[min_value2+1];
-                     float* colour2 = new float[3];
-                    triangle::get_texture_value(triangle2, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour2); 
+    if(min_value2!=-1){              
+        if(min_value!=-1){
+            int triangle = k[min_value+1];
+            float* colour = new float[3];
+            triangle::get_texture_value(triangle, FV, V, Rl, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
+            int triangle2 = k2[min_value2+1];
+            float* colour2 = new float[3];
+            triangle::get_texture_value(triangle2, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour2); 
 
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value =std::min(0.2f*outer_light.get_illumination()*alpha,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));
-                    }
-                    else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
-                        #pragma omp critical
-                        value = std::min(0.85f*inner_light.get_illumination()*alpha2,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value =1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] colour2;
-                    delete[] k;
-                }
-                else{
-                    int triangle = k2[min_value2+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value =std::min(0.85f*inner_light.get_illumination(),1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k2;
-                }
+            if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                #pragma omp critical
+                value =std::min(0.2f*outer_light.get_illumination()*alpha,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));
+            }
+            else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
+                #pragma omp critical
+                value = std::min(0.85f*inner_light.get_illumination()*alpha2,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
             }
             else{
                 #pragma omp critical
-                value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);              
-            }
-            (*colours)[index]=value; 
-            return value;
+                value =1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+            }  
+            delete[] colour;
+            delete[] colour2;
+            delete[] k;
         }
+        else{
+            int triangle = k2[min_value2+1];
+            float* colour = new float[3];
+            triangle::get_texture_value(triangle, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
+            if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                #pragma omp critical
+                value =std::min(0.85f*inner_light.get_illumination(),1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
+            }
+            else{
+                #pragma omp critical
+                value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+            }  
+            delete[] colour;
+            delete[] k2;
+        }
+    }
+    else{
+        #pragma omp critical
+        value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);              
+    }
+    (*colours)[index]=value; 
+    return value;
+}
         

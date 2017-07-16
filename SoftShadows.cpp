@@ -98,10 +98,8 @@ int main(int argc, char* argv[] ){
             ray_directionl.normalize();
             Ray Rl(s, ray_directionl);
 
-        float temp_value =        triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  z, inner_light, outer_light);
-
-        
-         value = value + temp_value;
+            float temp_value = triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  z, inner_light, outer_light);        
+            value = value + temp_value;
         }
 
         for(int z = 0; z<test_iterations; z++){
@@ -131,12 +129,9 @@ int main(int argc, char* argv[] ){
                 ray_directionl.normalize();
                 Ray Rl(s, ray_directionl);
 
-                
-        float temp_value =        triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  0, inner_light, outer_light);
-
-        
-         value = value + temp_value;
-         }
+                float temp_value =  triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  0, inner_light, outer_light);        
+                value = value + temp_value;
+            }
         }
 
          //Spherical light data:
