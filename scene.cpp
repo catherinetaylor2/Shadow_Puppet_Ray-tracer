@@ -38,7 +38,7 @@ light::light(float light_length, float light_illumination, vector3 C){ //sets up
     z_coord = C.z();
     illumination = light_illumination;
     centre.setValue(C.x(), C.y(), C.z()); //set at centre of screen.
-    direction.setValue(0.0f,0.0f,1.0f);
+    direction.setValue(0.0f,0.0f,-1.0f);
 }
 vector3 light::point_on_source(void){ //calculates random point on light source
     float a = uniform_random_number();
@@ -49,7 +49,7 @@ vector3 light::point_on_source(void){ //calculates random point on light source
     return Si;
 }
    
-sphere_light::sphere_light(vector3 sphere_centre, float sphere_radius){
+sphere_light::sphere_light(vector3 sphere_centre, float sphere_radius){ //spherical light source
     centre.setValue(sphere_centre.x(), sphere_centre.y(), sphere_centre.z());
     radius = sphere_radius;
 } 
@@ -57,18 +57,12 @@ vector3 sphere_light::point_on_source(void){
     float a = uniform_random_number()*270.0f; 
     float b = uniform_random_number()*90.0f+90.0f; 
     vector3 Si((float)radius*sin(b/180.0f*PI)*sin(a/180.0f*PI)+centre.x(), (float)radius*sin(b/180.0f*PI)*cos(a/180.0f*PI)+centre.y(),(float)radius*cos(b/180.0f*PI)+centre.z());
-   
     return Si;
 }
 
-float sphere_light::intensity(vector3 point){
+float sphere_light::intensity(vector3 point){ //inverse square law for light reduction
     vector3 diff = vector3::vec_add(centre, vector3::vec_scal_mult(-1, point));
     float min_diff = (centre.z()-point.z())*(centre.z()-point.z());
-
     float d = abs(vector3::dotproduct(diff, diff))/min_diff;
-
-
-    
-    //std::cout<<35500.0f/(d*4.0f*PI)<<"\n";
     return 10.0f/(d*4.0f*PI);
 }

@@ -81,6 +81,9 @@ class light{ //assuming square light
         vector3 get_centre(void){
             return centre;
         }
+        vector3 get_normal(void){
+            return direction;
+        }
         vector3 point_on_source(void);
        
     private:

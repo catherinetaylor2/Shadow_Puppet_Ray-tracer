@@ -69,9 +69,8 @@ int main(int argc, char* argv[] ){
     float light_length = 0.25f;
     vector3 light_centre(0.0f, 0.0f, 50.0f);
     light myLight(light_length, 1.0f, light_centre);
-    vector3 plane_n(0,0,-1); //light source normal
 
-    int iterations=100; //number of rays per pixel
+    int iterations=10; //number of rays per pixel
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
 
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
@@ -95,7 +94,7 @@ int main(int argc, char* argv[] ){
             L.normalize();
             Ray R(s, ray_direction);
             
-            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, plane_n, L, &colours, z );
+            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, myLight.get_normal(), L, &colours, z );
             value = value + temp_value;
         }
 
