@@ -59,7 +59,7 @@ class scene{
 };
 class light{ //assuming square light
     public:
-        light(float light_length,  float z, float light_illumination);
+        light(float light_length,float light_illumination, vector3 C);
         float get_xmin(void){
             return x_min;
         }
@@ -81,8 +81,6 @@ class light{ //assuming square light
         vector3 get_centre(void){
             return centre;
         }
-        bool ray_intersection(Ray R, triangle upper, triangle lower);
-        static float DiffuseValue( vector3 normal, vector3 light_direction);
         vector3 point_on_source(void);
        
     private:

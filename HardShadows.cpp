@@ -66,11 +66,12 @@ int main(int argc, char* argv[] ){
 
 //Set up scene and light position.
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
-    float light_length = 0.25f,I;
-    light myLight(light_length, 50.0f, 1.0f);
+    float light_length = 0.25f;
+    vector3 light_centre(0.0f, 0.0f, 50.0f);
+    light myLight(light_length, 1.0f, light_centre);
     vector3 plane_n(0,0,-1); //light source normal
 
-    int iterations=100;
+    int iterations=100; //number of rays per pixel
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
 
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
@@ -124,9 +125,9 @@ int main(int argc, char* argv[] ){
         delete[] colours;
         
 //Using Monte Carlo, average values.
-        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
         
         if(R>255.0f){ //clamp at 255
             R = 255.0f;

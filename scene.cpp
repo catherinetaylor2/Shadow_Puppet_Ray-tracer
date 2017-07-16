@@ -11,16 +11,16 @@ double uniform_random_number(void){
 }
 
 scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 origin, vector3 lookat, vector3 lookup){
-    x_res = xres;
-    y_res= yres;
-    height = 2*(float)focalLength*tan((float)fieldOfView/360.0f *PI/2.0f );
+    x_res = xres; //number of pixels in x direction
+    y_res= yres; 
+    height = 2*(float)focalLength*tan((float)fieldOfView/360.0f *PI/2.0f ); //height in world coords
     width = ((float)xres/(float)yres)*height;
     focal_length = focalLength;
     Camera_origin.setValue(origin.x(), origin.y(), origin.z());
     Camera_lookat.setValue(lookat.x(), lookat.y(), lookat.z());
     Camera_lookup.setValue(lookup.x(), lookup.y(), lookup.z());
 
-    eye_n = vector3::vec_add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat));
+    eye_n = vector3::vec_add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat)); //camera coord system
     eye_n.normalize();
     eye_u = vector3::crossproduct(Camera_lookup, eye_n);
     eye_u.normalize();
@@ -30,35 +30,17 @@ scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 o
     ratio = width/(float)x_res;
 }
 
-light::light(float light_length,  float z, float light_illumination){
-    x_min = -light_length;
-    x_max = light_length;
-    y_min = -light_length;
-    y_max = light_length;
-    z_coord = z;
+light::light(float light_length, float light_illumination, vector3 C){ //sets up position of camera
+    x_min = C.x()-light_length;
+    x_max = C.x()+light_length;
+    y_min = C.y()-light_length;
+    y_max = C.y()+light_length;
+    z_coord = C.z();
     illumination = light_illumination;
-    centre.setValue(0.0f,0.0f, z_coord);
+    centre.setValue(C.x(), C.y(), C.z()); //set at centre of screen.
     direction.setValue(0.0f,0.0f,1.0f);
 }
-bool light::ray_intersection(Ray R, triangle upper, triangle lower){
-    bool t_1 = upper.ray_triangle_intersection(R);
-    bool t_2 = lower.ray_triangle_intersection(R);
-    if((t_1==1)||(t_2)==1){
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-float light::DiffuseValue( vector3 normal, vector3 light_direction){
-    if (vector3::dotproduct(normal,light_direction)>0){        
-        return vector3::dotproduct(normal,light_direction);
-    }
-    else{
-        return 0;
-    }
-}
-vector3 light::point_on_source(void){
+vector3 light::point_on_source(void){ //calculates random point on light source
     float a = uniform_random_number();
     float b = uniform_random_number();
     vector3 tangent_v(0,1,0);
