@@ -26,15 +26,17 @@
 
 int main(int argc, char* argv[] ){
 
-    unsigned char * data;
+//Screen texture input
+    unsigned char * data; 
 	int texture_width, texture_height;
 	data = readBMP("sheet_5.bmp", &texture_width, &texture_height);
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
+//Puppet texture input
     unsigned char * dino_tex;
 	int dino_width, dino_height;
 	dino_tex = readBMP("dino_texture2.bmp", &dino_width, &dino_height);
-    std::cout<<"w "<<dino_width<<" "<<dino_height<<"\n";
+    std::cout<<"quad texture width "<<dino_width<<" quad texture height "<<dino_height<<"\n";
 
     int width, height;
 	if(argc>1){
@@ -46,7 +48,7 @@ int main(int argc, char* argv[] ){
 		height=1080;
 	}
 
-//Puppet mesh inputs
+//Quad mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
     ObjFile mesh_dino("quad.obj");
@@ -57,79 +59,68 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(V, FV, &leaf_nodes, &root);
 	std::cout<<"tree built \n";
 
-    int* edges;
-    mesh_dino.get_boundary_edges(FV, &edges, F);
-
+//Set up camera position
     vector3 eye(0.0f,0.0f,-75.0f);
     vector3 lookat(0.0f,0.0f,1.0f);
     vector3 lookup(0.0f,1.0f,-30.0f);
 
+//Set up scene and light position.
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
     float light_length = 0.25f,I;
     light myLight(light_length, 50.0f, 1.0f);
+    vector3 plane_n(0,0,-1); //light source normal
 
-    vector3 plane_n(0,0,-1);
-    vector3 puppet(0,0,1);    
-
-    vector3 V1(myLight.get_xmin(), myLight.get_ymin(), myLight.get_z());
-    vector3 V2(myLight.get_xmin(), myLight.get_ymax(), myLight.get_z());
-    vector3 V3(myLight.get_xmax(), myLight.get_ymin(), myLight.get_z());
-    vector3 V4(myLight.get_xmax(), myLight.get_ymax(), myLight.get_z());
-    triangle light_upper(V1, V4, V2);
-    triangle light_lower(V3, V4, V1);
-
-    int iterations=1;
+    int iterations=100;
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
-    for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
+
+    for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
         bool visibility;
         int i, j;
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
+        vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) ); //pixel position in world space.
 
         float value = 0,sum =0;
-        float value_rgb = 0;
-        int adaptive = 0, test_iterations = 25 ; 
+        int adaptive = 0, test_iterations = 25 ; //initial values for adaptive sampling
         float* colours = new float[test_iterations];
+
         #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
             vector3 Si = myLight.point_on_source();
-            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-            vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
-            L.normalize();
+            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z()); //from screen to light source
             ray_direction.normalize();
+            vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z()); //from light to screen
+            L.normalize();
             Ray R(s, ray_direction);
 
             int min_value = -1, *k;
-            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-            
-                    
-            if(min_value!=-1){
+            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k); //test for intersection with quad
+                
+            if(min_value!=-1){ //if intersects with quad
 
-                int triangle = k[min_value+1];
+                int triangle = k[min_value+1]; //triangle which has intersected with ray.
                 float* colour = new float[3];
-                triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour);  
+                triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); //find value of texture at POI
                 vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
-                float alpha = fabs(POI.z()-s.z())/100.0f;  
+                float alpha = fabs(POI.z()-s.z())/50.0f; //distance function for level of blending
                    
-                if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-
+                if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
                     #pragma omp critical
-                    value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f);
+                    value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f); //clamps shadow value at screen colour
                 }
-                else{
+                else{ //intesects with quad but not puppet
                     #pragma omp critical
-                    value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;
+                    value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f; //lighting model for background
                 }  
                 delete[] colour;
             }
          
-            else{
+            else{ //no intersections
                #pragma omp critical
                 value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;              
             }
-            colours[z]=value; 
+            colours[z]=value; //save values for adaptive sampling
             delete[] k;
         }
 
@@ -137,13 +128,13 @@ int main(int argc, char* argv[] ){
             sum += colours[z]; 
         }
         for(int z = 0; z<test_iterations; z++){
-            if(((colours)[z]/sum >0.05)&&(sum>0)){
+            if(((colours)[z]/sum >1.0f/(float)test_iterations)&&(sum>0)){ //if one ray differs significantly then test more.
                 adaptive = 1;
             }
         }
         delete [] colours;      
 
-        if(adaptive==1){
+        if(adaptive==1){ //if needed used adaptive and repeat above. PUT INTO FUNCTION?
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
                 vector3 Si = myLight.point_on_source();
@@ -162,7 +153,7 @@ int main(int argc, char* argv[] ){
                     float* colour = new float[3];
                     triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
                     vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
-                    float alpha = fabs(POI.z()-s.z())/100.0f; 
+                    float alpha = fabs(POI.z()-s.z())/50.0f; 
 
 
                     if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
@@ -184,11 +175,12 @@ int main(int argc, char* argv[] ){
             }              
         }
 
+//Using Monte Carlo, average values.
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
         float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);
         float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);
         
-        if(R>255.0f){
+        if(R>255.0f){ //clamp at 255
             R = 255.0f;
         }
         if(G>255.0f){
@@ -200,10 +192,9 @@ int main(int argc, char* argv[] ){
         img[x]=R;
         img[x+1]= G;
         img[x+2]=B ;
-  
     }
   
-    std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
+    std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); //write to bmp file.
     BITMAP_File_Header file_header;
     BITMAP_Info_Header info_header;
     fill_bitmap_headers(&file_header, &info_header,  width, height);
@@ -217,11 +208,11 @@ int main(int argc, char* argv[] ){
     }
     image2.close();
 
+//Clear up files.
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
     delete [] img;
     delete [] data;
-    delete [] edges;
     delete [] dino_tex;
 
     return 0;

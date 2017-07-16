@@ -47,7 +47,7 @@ int main(int argc, char* argv[] ){
 //Puppet mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("quad.obj");
+    ObjFile mesh_dino("quad2.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;

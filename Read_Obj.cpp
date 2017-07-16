@@ -205,36 +205,3 @@ void ObjFile::clean_up(float*vertices, float* normals, float* texture_coords,int
   delete [] face_normals;
   delete [] face_textures;
 }
-
-void ObjFile::get_boundary_edges(int* face_vertex, int** edges, int number_of_faces){
-  *edges = new int [number_of_vertices*number_of_vertices];
-  for(int i=0; i<number_of_vertices*number_of_vertices; i++){
-    (*edges)[i] = 0;
-  }
-  for (int i = 0; i<number_of_faces; i++){
-    int index_1 = face_vertex[3*i]-1, index_2 = face_vertex[3*i+1]-1, index_3 = face_vertex[3*i+2]-1;
-    (*edges)[std::min(index_1, index_2) + number_of_vertices*std::max(index_1, index_2)] +=1;
-    (*edges)[std::min(index_3, index_2) + number_of_vertices*std::max(index_3, index_2)] +=1;
-    (*edges)[std::min(index_1, index_3) + number_of_vertices*std::max(index_1, index_3)] +=1;
-  }
-}
-vector3 ObjFile::closet_edge_point(float* vertices,int* edges, vector3 point){
-  float distance = infinity;
-  int min_index = 0;
-  vector3 closest_point;
-  for(int i=0; i<number_of_vertices;i++){
-    for(int j=0; j<number_of_vertices; j++){
-      if (edges[i+number_of_vertices*j]==1){
-        vector3 V(vertices[3*i], vertices[3*i+1],vertices[3*i+2]);
-        vector3 diff = vector3::vec_add(V, vector3::vec_scal_mult(-1, point));
-        float d = sqrt(vector3::dotproduct(diff, diff));
-        if(d<distance){
-          distance = d;
-          min_index = i+number_of_vertices*j;
-          closest_point.setValue(V.x(), V.y(), V.z());
-        }
-      }
-    }
-  }
-  return closest_point;
-}
