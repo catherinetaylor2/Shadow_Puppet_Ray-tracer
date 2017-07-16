@@ -7,7 +7,7 @@
 
 #define infinity FLT_MAX
 
- Bounding_box::Bounding_box(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
+ Bounding_box::Bounding_box(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){ //define the box with min/max values
      parameters[0] = xmin;
      parameters[1] = xmax;
      parameters[2] = ymin;
@@ -16,7 +16,7 @@
      parameters[5] = zmax;
  }
 
-bool Bounding_box::ray_box_intersection(Ray R){
+bool Bounding_box::ray_box_intersection(Ray R){ //find boxes which ray intersects with
     float tmin_y, tmax_y, tmin_z, tmax_z;
     vector3 inv_direction(1/(R.direction.x()), 1/R.direction.y(), 1/R.direction.z());
     tmin = (parameters[0]- R.origin.x())*inv_direction.x();
@@ -32,22 +32,14 @@ bool Bounding_box::ray_box_intersection(Ray R){
      if (tmin_y > tmin){
         tmin = tmin_y;
      }
-     if (tmax_y < tmax){
+     if (tmax_y < tmax){ //only test in x and y as puppet is 2D
          tmax = tmax_y;
      }        
-     tmin_z = (parameters[4]- R.origin.z())*inv_direction.z();
-     tmax_z = (parameters[5]- R.origin.z())*inv_direction.z();
-   
-    //  if (tmin_z > tmax_z)std::swap(tmin_z, tmax_z);
-
-    //  if ((tmin > tmax_z)||(tmin_z>tmax)){
-    //      return 0;
-    //  }
      return 1;     
  }
 
-void search_tree::traverse_tree(search_tree*root, Ray R, std::vector<int> *output){
-    if(((root->left_node!=nullptr))||((root->right_node!=nullptr))){
+void search_tree::traverse_tree(search_tree*root, Ray R, std::vector<int> *output){ //traverse tree postorder
+    if(((root->left_node!=nullptr))||((root->right_node!=nullptr))){ //if not null go left, ow go right
         Bounding_box B_right(root->right_node->parameters[0],root->right_node->parameters[1], root->right_node->parameters[2],root->right_node->parameters[3],root->right_node->parameters[4],root->right_node->parameters[5]);
         Bounding_box B_left(root->left_node->parameters[0],root->left_node->parameters[1], root->left_node->parameters[2],root->left_node->parameters[3],root->left_node->parameters[4],root->left_node->parameters[5]);
         if ((root->right_node!=nullptr)&&(B_right.ray_box_intersection(R)==1)) {
@@ -57,9 +49,9 @@ void search_tree::traverse_tree(search_tree*root, Ray R, std::vector<int> *outpu
             traverse_tree(root->left_node, R, output);
         }   
     } 
-    if(((root->left_node==nullptr))&&((root->right_node==nullptr))){
+    if(((root->left_node==nullptr))&&((root->right_node==nullptr))){ //if null visit root
         Bounding_box B_root(root->parameters[0],root->parameters[1], root->parameters[2],root->parameters[3],root->parameters[4],root->parameters[5]);
-        if((B_root.ray_box_intersection(R)==1)){        
+        if((B_root.ray_box_intersection(R)==1)){ //if intersection then save
             for (int i = 0; i<root->number_of_node_faces; i++){
                 (*output).push_back( root->faces_in_node[i]);
             }         
@@ -67,7 +59,7 @@ void search_tree::traverse_tree(search_tree*root, Ray R, std::vector<int> *outpu
     }
 }
 
-void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<float> *parameters, std::vector<float> initial_parameters){
+void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<float> *parameters, std::vector<float> initial_parameters){ //use vertex values to find max and min values
     float xmin = initial_parameters[0], ymin = initial_parameters[2], zmin = initial_parameters[4], xmax=initial_parameters[1], ymax=initial_parameters[3], zmax = initial_parameters[5];
     for(int j=0; j<3; j++){
         if (vertices[3*(faces[3*i+j]-1)]< xmin){
@@ -93,10 +85,10 @@ void search_tree::find_parameters(int i, float* vertices,int*faces, std::vector<
 
 }
 
-void search_tree::leaf_nodes(float* vertices, int*faces, int number_of_faces, std::vector<search_tree*> *leaf_nodes){
+void search_tree::leaf_nodes(float* vertices, int*faces, int number_of_faces, std::vector<search_tree*> *leaf_nodes){ //create vector full of leaf nodes
     std::vector<float> parameters;
     std::vector<float> initial_parameters = {infinity, -1*infinity, infinity, -1*infinity, infinity, -1*infinity};
-    for(int i = 0; i<number_of_faces; i++){ // make list of leaf_nodes.
+    for(int i = 0; i<number_of_faces; i++){ 
         search_tree* leaf = new search_tree;
         leaf->number_of_node_faces = 1; 
         leaf->faces_in_node= new int [1];
@@ -112,17 +104,15 @@ void search_tree::leaf_nodes(float* vertices, int*faces, int number_of_faces, st
     }    
 }
 
-void search_tree::build_tree(float* vertices, int* faces, std::vector<search_tree*>* leaf_nodes, search_tree**root){
+void search_tree::build_tree(float* vertices, int* faces, std::vector<search_tree*>* leaf_nodes, search_tree**root){ //use leaf node vector to build bst.
     std::vector<float> parameters;
-    int it=0;
    
-    while((*leaf_nodes).size()>1){
-        it=it+1;
+    while((*leaf_nodes).size()>1){ //while vector has more than one element
         parameters.clear();
-        search_tree* temp = new search_tree;
-        search_tree* first = (*leaf_nodes)[0];
+        search_tree* temp = new search_tree; //create temp root node
+        search_tree* first = (*leaf_nodes)[0]; //pop first two elements
         search_tree* second = (*leaf_nodes)[1];
-        temp->left_node =(*leaf_nodes)[0];
+        temp->left_node =(*leaf_nodes)[0]; //set these trees as left and right values of temp
         temp->right_node = (*leaf_nodes)[1];
         temp->number_of_node_faces = first->number_of_node_faces+second->number_of_node_faces;
         (*leaf_nodes).erase ((*leaf_nodes).begin(),(*leaf_nodes).begin()+2);
@@ -141,13 +131,13 @@ void search_tree::build_tree(float* vertices, int* faces, std::vector<search_tre
         for(int j =0; j<6;j++){
              temp->parameters[j] = parameters[j];
         }
-        (*leaf_nodes).push_back(temp);
+        (*leaf_nodes).push_back(temp); //add temp value to end of vector
     }
        *root = (*leaf_nodes)[0];
         return;
 }
 
-void search_tree::delete_tree(search_tree* root){
+void search_tree::delete_tree(search_tree* root){ //delete all nodes in binary serach tree;
     if((root->left_node)!=nullptr){
         delete_tree((root)->left_node);
     }

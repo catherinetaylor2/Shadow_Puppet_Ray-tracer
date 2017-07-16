@@ -10,19 +10,19 @@
 #define infinity FLT_MAX
 
 
-ObjFile::ObjFile(std::string name){
+ObjFile::ObjFile(std::string name){ //constructor
 	fn = name;
 }
 
-void ObjFile::get_vertices(float** V){
+void ObjFile::get_vertices(float** V){ //find the vertices and store in array V
   char str[1000];
   float f1, f2, f3;
   std::string s = "a";
   FILE * myObject;
   int k_v = 0, t;
-  myObject = fopen(fn.c_str(), "r");
+  myObject = fopen(fn.c_str(), "r"); //opens object file
 
-  while (s != "v"){
+  while (s != "v"){ //scans file for specific arrangement of floats.
     t= fscanf(myObject, "%s %f %f %f" , str, &f1, &f2, &f3);
     s = str;  
   }
@@ -40,7 +40,7 @@ void ObjFile::get_vertices(float** V){
     t= fscanf(myObject, "%s %f %f %f" , str, &f1, &f2, &f3);
     s = str;  
   }
-  for(int i=0; i<3*number_of_vertices; i+=3){
+  for(int i=0; i<3*number_of_vertices; i+=3){ //save values in array.
     (*V)[i] = f1;
     (*V)[i+1] = f2;
     (*V)[i+2]=f3; 
@@ -49,7 +49,7 @@ void ObjFile::get_vertices(float** V){
   fclose(myObject);
 }
 
-void ObjFile::get_normals(float** N){
+void ObjFile::get_normals(float** N){ //as above with normals.
   char str[1000];
   float f1, f2, f3;
   std::string s = "a";
@@ -84,7 +84,7 @@ void ObjFile::get_normals(float** N){
    fclose(myObject);
 }
 
-void ObjFile::get_texture(float ** VT){
+void ObjFile::get_texture(float ** VT){ //get texture values.
   char str[1000];
   float f1, f2, f3;
   std::string s = "a";
@@ -131,7 +131,7 @@ void ObjFile::get_texture(float ** VT){
    fclose(myObject);
 }
 
-void ObjFile::get_face_data(int** face_vertex, int** face_normals, int** face_textures){
+void ObjFile::get_face_data(int** face_vertex, int** face_normals, int** face_textures){ //find face vertices, normals and texture.
   char str[1000], c1, c2, c3, c4, c5, c6;
   float f1, f2, f3;
   int i1, i2, i3, i4, i5, i6, i7, i8, i9;
@@ -174,7 +174,7 @@ void ObjFile::get_face_data(int** face_vertex, int** face_normals, int** face_te
   *face_normals = new int[3*number_of_faces];
   *face_textures = new int[3*number_of_faces];
 
-  for(int i=0; i<3*number_of_faces; i+=3){
+  for(int i=0; i<3*number_of_faces; i+=3){//store in arrays of integers
     t=fscanf(myObject, "%s %i %c %i %c %i %i %c %i %c %i %i %c %i %c %i", str, &i1, &c1, &i2, &c2, &i3, &i4, &c3, &i5, &c4, &i6, &i7, &c5, &i8, &c6, &i9);
     s=str;
     (*face_normals)[i] = i3;
@@ -197,11 +197,11 @@ void ObjFile::get_mesh_data(ObjFile mesh,int** face_vertex, int** face_normals, 
     number_of_vertices = mesh.get_number_of_vertices();
 	  *number_of_faces = mesh.get_number_of_faces();
 }
-void ObjFile::clean_up(float*vertices, float* normals, float* texture_coords,int* face_vertex, int* face_normals, int* face_textures){
-  delete [] vertices;
-  delete [] normals;
-  delete [] texture_coords;
-  delete [] face_vertex;
-  delete [] face_normals;
-  delete [] face_textures;
+void ObjFile::clean_up(float*vertices, float* normals, float* texture_coords,int* face_vertex, int* face_normals, int* face_textures){ //deletes pointers which are out of scope
+  delete[] vertices;
+  delete[] normals;
+  delete[] texture_coords;
+  delete[] face_vertex;
+  delete[] face_normals;
+  delete[] face_textures;
 }
