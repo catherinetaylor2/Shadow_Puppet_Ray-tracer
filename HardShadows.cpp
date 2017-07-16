@@ -93,35 +93,9 @@ int main(int argc, char* argv[] ){
             vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z()); //from light to screen
             L.normalize();
             Ray R(s, ray_direction);
-
-            int min_value = -1, *k;
-            float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k); //test for intersection with quad
-                
-            if(min_value!=-1){ //if intersects with quad
-
-                int triangle = k[min_value+1]; //triangle which has intersected with ray.
-                float* colour = new float[3];
-                triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); //find value of texture at POI
-                vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
-                float alpha = fabs(POI.z()-s.z())/50.0f; //distance function for level of blending
-                   
-                if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
-                    #pragma omp critical
-                    value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f); //clamps shadow value at screen colour
-                }
-                else{ //intesects with quad but not puppet
-                    #pragma omp critical
-                    value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f; //lighting model for background
-                }  
-                delete[] colour;
-            }
-         
-            else{ //no intersections
-               #pragma omp critical
-                value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;              
-            }
-            colours[z]=value; //save values for adaptive sampling
-            delete[] k;
+            
+            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, plane_n, L, &colours, z );
+            value = value + temp_value;
         }
 
         for(int z = 0; z<test_iterations; z++){
@@ -131,10 +105,9 @@ int main(int argc, char* argv[] ){
             if(((colours)[z]/sum >1.0f/(float)test_iterations)&&(sum>0)){ //if one ray differs significantly then test more.
                 adaptive = 1;
             }
-        }
-        delete [] colours;      
+        }    
 
-        if(adaptive==1){ //if needed used adaptive and repeat above. PUT INTO FUNCTION?
+        if(adaptive==1){ //if needed used adaptive and repeat above.
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
                 vector3 Si = myLight.point_on_source();
@@ -144,37 +117,12 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-                int min_value = -1, *k ;
-                float t_min = triangle::intersection_point(root, V, R,FV, &min_value, &k);
-                
-                if(min_value!=-1){
-                    
-                    int triangle = k[min_value+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                    vector3 POI = vector3::vec_add(s, vector3::vec_scal_mult(t_min,  ray_direction));  
-                    float alpha = fabs(POI.z()-s.z())/50.0f; 
-
-
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f);
-
-                    }
-                    else{
-                        #pragma omp critical
-                        value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;
-                    }  
-                    delete[] colour;
-                }
-                else{
-                    #pragma omp critical
-                    value = value+1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;
-                }  
-                delete[] k;    
-            }              
+                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, plane_n, L, &colours, 0 );
+                value = value + temp_value;
+            }
         }
-
+        delete[] colours;
+        
 //Using Monte Carlo, average values.
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
         float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);

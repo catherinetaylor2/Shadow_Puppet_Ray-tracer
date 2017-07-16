@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 #include "triangle.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
@@ -147,3 +148,34 @@ void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, u
 
   delete[] barycentric;
 }
+float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int* FV, int*FT, float*VT,  unsigned char* dino_tex, int dino_width, int dino_height, vector3 plane_n, vector3 L, float**colours, int index){
+    int min_value = -1, *k;
+    float value;
+    float t_min = triangle::intersection_point(root, vertices, R,FV, &min_value, &k); //test for intersection with quad
+    if(min_value!=-1){ //if intersects with quad
+        int triangle = k[min_value+1]; //triangle which has intersected with ray.
+        float* colour = new float[3];
+        triangle::get_texture_value(triangle, FV, vertices, R, dino_tex, FT, VT, dino_width, dino_height, &colour); //find value of texture at POI
+        vector3 POI = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min,  R.get_direction()));  
+        float alpha = fabs(POI.z()-R.get_origin().z())/50.0f; //distance function for level of blending
+
+        if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
+            #pragma omp critical
+            value = std::min(alpha,1.3f*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f); //clamps shadow value at screen colour
+        }
+        else{ //intesects with quad but not puppet
+            #pragma omp critical
+            value = 1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f; //lighting model for background
+        }  
+        delete[] colour;
+    }
+
+    else{ //no intersections
+        #pragma omp critical
+        value = 1.3*pow(vector3::dotproduct(plane_n, L),50.0f)+0.4f;              
+    }
+    (*colours)[index]=value; //save values for adaptive sampling
+    delete[] k;
+    return value;
+    }
+        

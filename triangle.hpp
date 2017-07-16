@@ -15,6 +15,8 @@ class triangle{
         }
         float ray_triangle_intersection(Ray R);
         static float intersection_point(search_tree* root, float*vertices, Ray R, int* faces, int* min_value, int**k);
+        static float intersection_value(Ray R, search_tree* root, float*vertices, int* FV, int*FT, float*VT, unsigned char* dino_tex, int dino_width, int dino_height, vector3 plane_n, vector3 L, float**colours, int index);
+
         static void get_texture_value(int triangle, int* FV, float *V, Ray R, unsigned char* dino_tex, int* FT, float* VT, int dino_width, int dino_height, float **colour);
     private:
         float plane_constant;
