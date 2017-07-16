@@ -12,6 +12,7 @@
 #include <cmath>
 #include <vector>
 #include <thread>
+#include <algorithm>
 #include "Read_Obj.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
@@ -25,14 +26,16 @@
 
 int main(int argc, char* argv[] ){
 
+//Input screen texture data
     unsigned char * data;
 	int texture_width, texture_height;
 	data = readBMP("sheet6.bmp", &texture_width, &texture_height);
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
-    unsigned char * dino_tex;
-	int dino_width, dino_height;
-	dino_tex = readBMP("dino_texture2.bmp", &dino_width, &dino_height);
+//Input puppet texture data   
+    unsigned char * puppet_tex;
+	int puppet_width, puppet_height;
+	puppet_tex = readBMP("dino_texture2.bmp", &puppet_width, &puppet_height);
 
     int width, height;
 	if(argc>1){
@@ -55,28 +58,21 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(V, FV, &leaf_nodes, &root);
 	std::cout<<"tree built \n";
 
-    vector3 eye(0.0f,0.0f,-75.0f);
-    vector3 lookat(0.0f,0.0f,1.0f);
-    vector3 lookup(0.0f,1.0f,-30.0f);
+//Camera input
+    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);
 
+//Scene set up
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
-    float inner_light_length = 0.1f;
-    vector3 inner_centre(0.0f, 0.0f, 50.0f);
+    float inner_light_length = 0.1f, outer_light_length = 8.0f;
+    vector3 inner_centre(0.0f, 0.0f, 50.0f), outer_centre(0.0f, 0.0f, 70.0f);
     light inner_light(inner_light_length,1.0f, inner_centre);
-    float outer_light_length = 6.0f;
-    vector3 outer_centre(0.0f, 0.0f, 70.0f);
-    light outer_light(outer_light_length, 1.0f, outer_centre);
+    light outer_light(outer_light_length, 0.9f, outer_centre);
 
-    vector3 c(0.0f, 45.0f,50.0f);
-    sphere_light sphereLight(c, 4.0f);
-
-    vector3 plane_n(0,0,-1);
-    vector3 puppet(0,0,1);
     int iterations=100;
 
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
-        bool visibility;
+
         int i, j;
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
@@ -84,7 +80,6 @@ int main(int argc, char* argv[] ){
         vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
 
         float value = 0,sum =0;
-        float value_rgb = 0;
         int adaptive = 0, test_iterations = 25 ; 
         float* colours = new float[test_iterations];
         #pragma omp parallel for
@@ -103,59 +98,10 @@ int main(int argc, char* argv[] ){
             ray_directionl.normalize();
             Ray Rl(s, ray_directionl);
 
-            int min_value = -1, *k;
-            float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
-           
-            int min_value2 = -1, *k2;
-            float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);            
+        float temp_value =        triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  z, inner_light, outer_light);
 
-            if(min_value2!=-1){              
-                if(min_value!=-1){
-                    int triangle = k[min_value+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, Rl, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                    int triangle2 = k2[min_value2+1];
-                     float* colour2 = new float[3];
-                    triangle::get_texture_value(triangle2, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour2); 
-
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+0.2f*outer_light.get_illumination();
-                    }
-                    else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
-                        #pragma omp critical
-                        value = value+0.85f*inner_light.get_illumination();                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k;
-                }
-                else{
-                    int triangle = k2[min_value2+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+0.85f*inner_light.get_illumination();                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k2;
-                }
-            }
-            else{
-                #pragma omp critical
-                value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                #pragma omp critical
-                value_rgb = value_rgb ;              
-            }
-            colours[z]=value; 
+        
+         value = value + temp_value;
         }
 
         for(int z = 0; z<test_iterations; z++){
@@ -185,58 +131,13 @@ int main(int argc, char* argv[] ){
                 ray_directionl.normalize();
                 Ray Rl(s, ray_directionl);
 
-                int min_value = -1, *k , min_value2 = -1, *k2 ;
-                float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
-                float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);       
                 
-                if(min_value2!=-1){              
-                    if(min_value!=-1){
-                        int triangle = k[min_value+1];
-                    float* colour = new float[3];
-                    triangle::get_texture_value(triangle, FV, V, Rl, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                    int triangle2 = k2[min_value2+1];
-                     float* colour2 = new float[3];
-                    triangle::get_texture_value(triangle2, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour2); 
+        float temp_value =        triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  0, inner_light, outer_light);
 
-                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                        #pragma omp critical
-                        value = value+0.2f*outer_light.get_illumination();
-                    }
-                    else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
-                        #pragma omp critical
-                        value = value+0.85f*inner_light.get_illumination();                        
-                    }
-                    else{
-                        #pragma omp critical
-                        value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    }  
-                    delete[] colour;
-                    delete[] k;
-                    }
-                    else{
-                        int triangle = k2[min_value2+1];
-                        float* colour = new float[3];
-                        triangle::get_texture_value(triangle, FV, V, R, dino_tex, FT, VT, dino_width, dino_height, &colour); 
-                        if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
-                            #pragma omp critical
-                            value = value+0.85f*inner_light.get_illumination();     
-                        }
-                        else{
-                            #pragma omp critical
-                            value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                        }  
-                        delete[] colour;
-                        delete[] k2;
-                    }
-                }
-                else{
-                    #pragma omp critical
-                    value = value+1.3f*pow(vector3::dotproduct(plane_n, L),10.0f);
-                    #pragma omp critical
-                    value_rgb = value_rgb ;              
-                }
-            }
+        
+         value = value + temp_value;
          }
+        }
 
          //Spherical light data:
         float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
@@ -274,7 +175,7 @@ int main(int argc, char* argv[] ){
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-    delete[] dino_tex;
+    delete[] puppet_tex;
     delete[] data;
     delete[] img;
 

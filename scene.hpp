@@ -3,7 +3,6 @@
 
 #include "vec3.hpp"
 #include "ray.hpp"
-#include "triangle.hpp"
 
 class scene{
     public:

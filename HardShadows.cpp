@@ -33,10 +33,10 @@ int main(int argc, char* argv[] ){
     std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
 
 //Puppet texture input
-    unsigned char * dino_tex;
-	int dino_width, dino_height;
-	dino_tex = readBMP("dino_texture2.bmp", &dino_width, &dino_height);
-    std::cout<<"quad texture width "<<dino_width<<" quad texture height "<<dino_height<<"\n";
+    unsigned char * puppet_tex;
+	int puppet_width, puppet_height;
+	puppet_tex = readBMP("puppet_texture2.bmp", &puppet_width, &puppet_height);
+    std::cout<<"quad texture width "<<puppet_width<<" quad texture height "<<puppet_height<<"\n";
 
     int width, height;
 	if(argc>1){
@@ -60,9 +60,7 @@ int main(int argc, char* argv[] ){
 	std::cout<<"tree built \n";
 
 //Set up camera position
-    vector3 eye(0.0f,0.0f,-75.0f);
-    vector3 lookat(0.0f,0.0f,1.0f);
-    vector3 lookup(0.0f,1.0f,-30.0f);
+    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);
 
 //Set up scene and light position.
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
@@ -94,7 +92,7 @@ int main(int argc, char* argv[] ){
             L.normalize();
             Ray R(s, ray_direction);
             
-            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, myLight.get_normal(), L, &colours, z );
+            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, myLight.get_normal(), L, &colours, z );
             value = value + temp_value;
         }
 
@@ -117,7 +115,7 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, dino_tex, dino_width, dino_height, plane_n, L, &colours, 0 );
+                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height,  myLight.get_normal(), L, &colours, 0 );
                 value = value + temp_value;
             }
         }
@@ -161,7 +159,7 @@ int main(int argc, char* argv[] ){
     search_tree::delete_tree(root);
     delete [] img;
     delete [] data;
-    delete [] dino_tex;
+    delete [] puppet_tex;
 
     return 0;
 }

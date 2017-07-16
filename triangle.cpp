@@ -7,6 +7,7 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "search_tree.hpp"
+#include "scene.hpp"
 
 triangle::triangle(vector3 V1, vector3 V2, vector3 V3){ //triangle constructor
     vertex1.setValue(V1.x(), V1.y(), V1.z()); //triangle vertices
@@ -80,7 +81,7 @@ float triangle::ray_triangle_intersection(Ray R){
     return t_min; //value of t when intersection occurs
  }
 
-void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, unsigned char* dino_tex, int* FT, float* VT, int dino_width, int dino_height, float **colour)
+void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, unsigned char* puppet_tex, int* FT, float* VT, int puppet_width, int puppet_height, float **colour)
 { //use cramers rule to find baryentric coords.
     float denominator;    
     int index1, index2, index3;
@@ -106,8 +107,8 @@ void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, u
 
     float u_coord, v_coord, alpha, beta, v12r, v12g, v12b, v34r, v34g, v34b;
     int v1x,v1y, v2x, v4y;
-    u_coord = (barycentric[0]*vt_1x +barycentric[1]*vt_2x+barycentric[2]*vt_3x)*dino_width; //use barycentric coords to find position inside triangle
-    v_coord = (barycentric[0]*vt_1y +barycentric[1]*vt_2y+barycentric[2]*vt_3y)*dino_height;
+    u_coord = (barycentric[0]*vt_1x +barycentric[1]*vt_2x+barycentric[2]*vt_3x)*puppet_width; //use barycentric coords to find position inside triangle
+    v_coord = (barycentric[0]*vt_1y +barycentric[1]*vt_2y+barycentric[2]*vt_3y)*puppet_height;
     v1x = (int)floor(u_coord); //find corner pixel values
     v1y = (int)ceil(v_coord);
     v2x = (int)ceil(u_coord);
@@ -135,12 +136,12 @@ void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, u
         beta =1;
     }
 //bilinear interpolation to find texture value
-    v12r = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x] + alpha*dino_tex[v1y*dino_width*3 + 3*v2x]; 
-    v12g = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x+1] + alpha*dino_tex[v1y*dino_width*3 + 3*v2x+1];
-    v12b = (1-alpha)*dino_tex[v1y*dino_width*3 + 3*v1x+2] + alpha*dino_tex[v1y*dino_width*3 + 3*v2x+2];    
-    v34r = (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x] + alpha*dino_tex[v4y*dino_width*3 + 3*v2x];
-    v34g = (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x+1] + alpha*dino_tex[v4y*dino_width*3 + 3*v2x+1];
-    v34b = (1-alpha)*dino_tex[v4y*dino_width*3 + 3*v1x+2] + alpha*dino_tex[v4y*dino_width*3 + 3*v2x+2];
+    v12r = (1-alpha)*puppet_tex[v1y*puppet_width*3 + 3*v1x] + alpha*puppet_tex[v1y*puppet_width*3 + 3*v2x]; 
+    v12g = (1-alpha)*puppet_tex[v1y*puppet_width*3 + 3*v1x+1] + alpha*puppet_tex[v1y*puppet_width*3 + 3*v2x+1];
+    v12b = (1-alpha)*puppet_tex[v1y*puppet_width*3 + 3*v1x+2] + alpha*puppet_tex[v1y*puppet_width*3 + 3*v2x+2];    
+    v34r = (1-alpha)*puppet_tex[v4y*puppet_width*3 + 3*v1x] + alpha*puppet_tex[v4y*puppet_width*3 + 3*v2x];
+    v34g = (1-alpha)*puppet_tex[v4y*puppet_width*3 + 3*v1x+1] + alpha*puppet_tex[v4y*puppet_width*3 + 3*v2x+1];
+    v34b = (1-alpha)*puppet_tex[v4y*puppet_width*3 + 3*v1x+2] + alpha*puppet_tex[v4y*puppet_width*3 + 3*v2x+2];
 
     (*colour)[0] = (1-beta)*v12r + beta*v34r; //colour of texture point
     (*colour)[1] = (1-beta)*v12g + beta*v34g;
@@ -148,14 +149,14 @@ void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, u
 
   delete[] barycentric;
 }
-float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int* FV, int*FT, float*VT,  unsigned char* dino_tex, int dino_width, int dino_height, vector3 plane_n, vector3 L, float**colours, int index){
+float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int* FV, int*FT, float*VT,  unsigned char* puppet_tex, int puppet_width, int puppet_height, vector3 plane_n, vector3 L, float**colours, int index){
     int min_value = -1, *k;
     float value;
     float t_min = triangle::intersection_point(root, vertices, R,FV, &min_value, &k); //test for intersection with quad
     if(min_value!=-1){ //if intersects with quad
         int triangle = k[min_value+1]; //triangle which has intersected with ray.
         float* colour = new float[3];
-        triangle::get_texture_value(triangle, FV, vertices, R, dino_tex, FT, VT, dino_width, dino_height, &colour); //find value of texture at POI
+        triangle::get_texture_value(triangle, FV, vertices, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); //find value of texture at POI
         vector3 POI = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min,  R.get_direction()));  
         float alpha = fabs(POI.z()-R.get_origin().z())/50.0f; //distance function for level of blending
 
@@ -178,4 +179,64 @@ float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int
     delete[] k;
     return value;
     }
+        
+float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, int* FV, int*FT, float*VT, unsigned char* puppet_tex, int puppet_width, int puppet_height, vector3 plane_n, vector3 L, float**colours, int index, light inner_light, light outer_light){
+    int min_value = -1, *k,min_value2 = -1, *k2;
+    float value;
+    float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
+    vector3 POI = vector3::vec_add(Rl.get_origin(), vector3::vec_scal_mult(t_min,  Rl.get_direction()));  
+    float alpha = sqrt(fabs(POI.z()-Rl.get_origin().z())/15.0f); //distance function for level of blending
+                   
+            float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);     
+            vector3 POI2 = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
+            float alpha2 = sqrt(fabs(POI2.z()-R.get_origin().z())/15.0f); //distance function for level of blending
+   
+            if(min_value2!=-1){              
+                if(min_value!=-1){
+                    int triangle = k[min_value+1];
+                    float* colour = new float[3];
+                    triangle::get_texture_value(triangle, FV, V, Rl, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
+                    int triangle2 = k2[min_value2+1];
+                     float* colour2 = new float[3];
+                    triangle::get_texture_value(triangle2, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour2); 
+
+                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                        #pragma omp critical
+                        value =std::min(0.2f*outer_light.get_illumination()*alpha,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));
+                    }
+                    else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
+                        #pragma omp critical
+                        value = std::min(0.85f*inner_light.get_illumination()*alpha2,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
+                    }
+                    else{
+                        #pragma omp critical
+                        value =1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+                    }  
+                    delete[] colour;
+                    delete[] colour2;
+                    delete[] k;
+                }
+                else{
+                    int triangle = k2[min_value2+1];
+                    float* colour = new float[3];
+                    triangle::get_texture_value(triangle, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
+                    if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
+                        #pragma omp critical
+                        value =std::min(0.85f*inner_light.get_illumination(),1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
+                    }
+                    else{
+                        #pragma omp critical
+                        value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+                    }  
+                    delete[] colour;
+                    delete[] k2;
+                }
+            }
+            else{
+                #pragma omp critical
+                value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);              
+            }
+            (*colours)[index]=value; 
+            return value;
+        }
         

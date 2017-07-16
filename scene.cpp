@@ -2,7 +2,6 @@
 #include "scene.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
-#include "triangle.hpp"
 
 #define PI 3.141592654f
 
