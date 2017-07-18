@@ -158,7 +158,9 @@ float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int
         float* colour = new float[3];
         triangle::get_texture_value(triangle, FV, vertices, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); //find value of texture at POI
         vector3 POI = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min,  R.get_direction()));  
-        float alpha = fabs(POI.z()-R.get_origin().z())/50.0f; //distance function for level of blending
+        vector3 dis = vector3::vec_add(POI, vector3::vec_scal_mult(-1, R.get_origin()));
+        float dist = sqrt(vector3::dotproduct(dis,dis));
+        float alpha = fabs(dist)/50.0f; //distance function for level of blending
 
         if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
             #pragma omp critical
@@ -185,11 +187,15 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
     float value;
     float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
     vector3 POI = vector3::vec_add(Rl.get_origin(), vector3::vec_scal_mult(t_min,  Rl.get_direction()));  
-    float alpha = sqrt(fabs(POI.z()-Rl.get_origin().z())/15.0f); //distance function for level of blending
+    vector3 dis = vector3::vec_add(POI, vector3::vec_scal_mult(-1, Rl.get_origin()));
+    float dist = sqrt(vector3::dotproduct(dis,dis));
+    float alpha = fabs(dist)/15.0f; //distance function for level of blending
                    
     float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);     
     vector3 POI2 = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
-    float alpha2 = sqrt(fabs(POI2.z()-R.get_origin().z())/15.0f); //distance function for level of blending
+    vector3 dis2 = vector3::vec_add(POI2, vector3::vec_scal_mult(-1, R.get_origin()));
+    float dist2 = sqrt(vector3::dotproduct(dis2,dis2));
+    float alpha2 = fabs(dist2)/15.0f; //distance function for level of blending
    
     if(min_value2!=-1){              
         if(min_value!=-1){
@@ -202,7 +208,7 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
 
             if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
                 #pragma omp critical
-                value =std::min(0.2f*outer_light.get_illumination()*alpha,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));
+                value =std::min(0.3f*outer_light.get_illumination()*alpha,1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));
             }
             else if((colour2[0]<10)&&(colour2[1]<10)&&(colour2[2]<10)){
                 #pragma omp critical
@@ -222,7 +228,7 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
             triangle::get_texture_value(triangle, FV, V, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); 
             if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){
                 #pragma omp critical
-                value =std::min(0.85f*inner_light.get_illumination(),1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
+                value = std::min(0.85f*inner_light.get_illumination(),1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f));                        
             }
             else{
                 #pragma omp critical

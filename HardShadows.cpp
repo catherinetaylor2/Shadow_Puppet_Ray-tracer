@@ -35,7 +35,7 @@ int main(int argc, char* argv[] ){
 //Puppet texture input
     unsigned char * puppet_tex;
 	int puppet_width, puppet_height;
-	puppet_tex = readBMP("puppet_texture2.bmp", &puppet_width, &puppet_height);
+	puppet_tex = readBMP("dino_texture2.bmp", &puppet_width, &puppet_height);
     std::cout<<"quad texture width "<<puppet_width<<" quad texture height "<<puppet_height<<"\n";
 
     int width, height;
@@ -51,7 +51,7 @@ int main(int argc, char* argv[] ){
 //Quad mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("quad.obj");
+    ObjFile mesh_dino("quad2.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
