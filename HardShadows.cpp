@@ -61,9 +61,9 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
     ObjFile DinoMesh("Objects/quad.obj");
 	DinoMesh.get_mesh_data(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces);
     search_tree* root; 
-    std::vector<search_tree*> LeafaceNormalsodes;
-    search_tree::leaf_nodes(vertices, faceVertices, numberOfFaces, &LeafaceNormalsodes);
-	search_tree::build_tree(vertices, faceVertices, &LeafaceNormalsodes, &root);
+    std::vector<search_tree*> LeafNodes;
+    search_tree::leaf_nodes(vertices, faceVertices, numberOfFaces, &LeafNodes);
+	search_tree::build_tree(vertices, faceVertices, &LeafNodes, &root);
 	std::cout<<"tree built \n";
 
     //Set up camera position
@@ -86,9 +86,9 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
 
         vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
 
-        float value = 0.0f, sum = 0.0f;
+        float value = 0.0f, PixelColourSum= 0.0f;
         int adaptive = 0, testIterations = 25 ; //initial values for adaptive sampling
-        float* colours = new float[testIterations];
+        float* intersectionColours = new float[testIterations];
 
         #pragma omp parallel for
         for(int z =0; z <testIterations; ++z){
@@ -99,15 +99,15 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
             LightRayDirection.normalize();
             Ray RayFired(pixelCoord, rayDirections);
             
-            value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &colours, z );
+            value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
             
         }
 
         for(int z = 0; z<testIterations; ++z){
-            sum += colours[z]; 
+            PixelColourSum+= intersectionColours[z]; 
         }
         for(int z = 0; z<testIterations; ++z){
-            if(((colours)[z]/sum >1.0f/(float)testIterations)&&(sum>0)){ //if one ray differssignificantly then test more.
+            if(((intersectionColours)[z]/PixelColourSum>1.0f/(float)testIterations)&&(PixelColourSum>0)){ //if one ray differs significantly then test more.
                 adaptive = 1;
             }
         }    
@@ -123,11 +123,11 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
                 LightRayDirection.normalize();
                 Ray RayFired(pixelCoord, rayDirections);
 
-                value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &colours, 0 );
+                value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
                 
             }
         }
-        delete[] colours;
+        delete[] intersectionColours;
         
         //Using Monte Carlo, average values.
         float R = TextureData[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
