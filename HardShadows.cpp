@@ -28,15 +28,15 @@ int main(int argc, char* argv[] ){
 
 //Screen texture input
     unsigned char * data; 
-	int texture_width, texture_height;
-	data = readBMP("sheet_5.bmp", &texture_width, &texture_height);
-    std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
+	int ScreenTextureWidth, ScreenTextureHeight;
+	data = readBMP("Textures/sheet_5.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
+    std::cout<<"width "<<ScreenTextureWidth<<" "<<ScreenTextureHeight<<"\n";
 
 //Puppet texture input
-    unsigned char * puppet_tex;
-	int puppet_width, puppet_height;
-	puppet_tex = readBMP("dino_texture2.bmp", &puppet_width, &puppet_height);
-    std::cout<<"quad texture width "<<puppet_width<<" quad texture height "<<puppet_height<<"\n";
+    unsigned char * PuppetTexture;
+	int PuppetTextureWidth, PuppetTextureHeight;
+	PuppetTexture = readBMP("Textures/dino_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
+    std::cout<<"quad texture width "<<PuppetTextureWidth<<"  "<<PuppetTextureHeight<<"\n";
 
     int width, height;
 	if(argc>1){
@@ -48,10 +48,24 @@ int main(int argc, char* argv[] ){
 		height=1080;
 	}
 
+
+for (int obj_file_input = 1;  obj_file_input<2; obj_file_input++){
+    std::string j;
+
+    		if(obj_file_input < 10){
+			j = "000"+std::to_string(obj_file_input);
+		}
+		else if ((obj_file_input>=10)&&(obj_file_input<100)){
+			j= "00" + std::to_string(obj_file_input);
+		}
+		else{
+			j= "0" + std::to_string(obj_file_input);
+		}
+
 //Quad mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("quad2.obj");
+    ObjFile mesh_dino("Objects/quad.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
@@ -92,7 +106,7 @@ int main(int argc, char* argv[] ){
             L.normalize();
             Ray R(s, ray_direction);
             
-            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, myLight.get_normal(), L, &colours, z );
+            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), L, &colours, z );
             value = value + temp_value;
         }
 
@@ -115,16 +129,16 @@ int main(int argc, char* argv[] ){
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height,  myLight.get_normal(), L, &colours, 0 );
+                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), L, &colours, 0 );
                 value = value + temp_value;
             }
         }
         delete[] colours;
         
 //Using Monte Carlo, average values.
-        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+        float R = data[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+        float G = data[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+        float B = data[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
         
         if(R>255.0f){ //clamp at 255
             R = 255.0f;
@@ -154,12 +168,16 @@ int main(int argc, char* argv[] ){
     }
     image2.close();
 
+
+
 //Clear up files.
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
     delete [] img;
+
+}
     delete [] data;
-    delete [] puppet_tex;
+    delete [] PuppetTexture;
 
     return 0;
 }

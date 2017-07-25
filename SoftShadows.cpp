@@ -28,9 +28,9 @@ int main(int argc, char* argv[] ){
 
 //Input screen texture data
     unsigned char * data;
-	int texture_width, texture_height;
-	data = readBMP("sheet6.bmp", &texture_width, &texture_height);
-    std::cout<<"width "<<texture_width<<" "<<texture_height<<"\n";
+	int ScreenTextureWidth, ScreenTextureHeight;
+	data = readBMP("sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
+    std::cout<<"width "<<ScreenTextureWidth<<" "<<ScreenTextureHeight<<"\n";
 
 //Input puppet texture data   
     unsigned char * puppet_tex;
@@ -135,9 +135,9 @@ int main(int argc, char* argv[] ){
         }
 
          //Spherical light data:
-        float R = data[j*texture_width*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float G = data[j*texture_width*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);
-        float B = data[j*texture_width*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        float R = data[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        float G = data[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations);
+        float B = data[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations);
 
         if(R>255.0f){
             R = 255.0f;

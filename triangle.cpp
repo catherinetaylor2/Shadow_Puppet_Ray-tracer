@@ -216,7 +216,7 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
             }
             else{
                 #pragma omp critical
-                value =1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+                value =1.5f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
             }  
             delete[] colour;
             delete[] colour2;
@@ -232,7 +232,7 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
             }
             else{
                 #pragma omp critical
-                value = 1.3f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
+                value = 1.5f*pow(vector3::dotproduct(inner_light.get_normal(), L),10.0f);
             }  
             delete[] colour;
             delete[] k2;
