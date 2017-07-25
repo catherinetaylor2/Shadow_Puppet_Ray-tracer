@@ -49,72 +49,72 @@ int main(int argc, char* argv[] ){
 	}
 
 
-for (int obj_file_input = 1;  obj_file_input<2; obj_file_input++){
+for (int ObjFileInput = 1;  ObjFileInput<2; ObjFileInput++){
     std::string j;
 
-    		if(obj_file_input < 10){
-			j = "000"+std::to_string(obj_file_input);
+        if(ObjFileInput < 10){
+			j = "000"+std::to_string(ObjFileInput);
 		}
-		else if ((obj_file_input>=10)&&(obj_file_input<100)){
-			j= "00" + std::to_string(obj_file_input);
+		else if ((ObjFileInput>=10)&&(ObjFileInput<100)){
+			j= "00" + std::to_string(ObjFileInput);
 		}
 		else{
-			j= "0" + std::to_string(obj_file_input);
+			j= "0" + std::to_string(ObjFileInput);
 		}
 
 //Quad mesh inputs
-    float *V, *N, *VT;
-    int F, *FV, *FN, *FT;
+    float *vertices, *normals, *Textures;
+    int numberOfFaces, *faceVertices, *faceNormals, *faceTextures;
     ObjFile mesh_dino("Objects/quad.obj");
-	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
+	mesh_dino.get_mesh_data(mesh_dino, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces);
     search_tree* root; 
-    std::vector<search_tree*> leaf_nodes;
-    search_tree::leaf_nodes(V, FV, F, &leaf_nodes);
-	search_tree::build_tree(V, FV, &leaf_nodes, &root);
+    std::vector<search_tree*> LeafaceNormalsodes;
+    search_tree::leaf_nodes(vertices, faceVertices, numberOfFaces, &LeafaceNormalsodes);
+	search_tree::build_tree(vertices, faceVertices, &LeafaceNormalsodes, &root);
 	std::cout<<"tree built \n";
 
-//Set up camera position
+//Set up camera poPointOnLighttion
     vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);
 
-//Set up scene and light position.
+//Set up scene and light poPointOnLighttion.
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
-    float light_length = 0.25f;
-    vector3 light_centre(0.0f, 0.0f, 50.0f);
-    light myLight(light_length, 1.0f, light_centre);
+    float LightLength = 0.25f;
+    vector3 LightCentre(0.0f, 0.0f, 50.0f);
+    light myLight(LightLength, 1.0f, LightCentre);
 
     int iterations=10; //number of rays per pixel
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
 
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
-        bool visibility;
+        bool viPointOnLightbility;
         int i, j;
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 s = vector3::vec_add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) ); //pixel position in world space.
+        vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) ); //pixel poPointOnLighttion in world space.
 
-        float value = 0,sum =0;
-        int adaptive = 0, test_iterations = 25 ; //initial values for adaptive sampling
-        float* colours = new float[test_iterations];
+        float value = 0.0f, sum = 0.0f;
+        int adaptive = 0, testIterations = 25 ; //initial values for adaptive sampling
+        float* colours = new float[testIterations];
 
         #pragma omp parallel for
-        for(int z =0; z <test_iterations; z++){
-            vector3 Si = myLight.point_on_source();
-            vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z()); //from screen to light source
-            ray_direction.normalize();
-            vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z()); //from light to screen
+        for(int z =0; z <testIterations; z++){
+            vector3 PointOnLight = myLight.point_on_source();
+            vector3 rayDirections = vector3::subtract(PointOnLight, pixelCoord); //from screen to light source
+            rayDirections.normalize();
+            vector3 L = vector3::subtract(pixelCoord, PointOnLight);
             L.normalize();
-            Ray R(s, ray_direction);
+            Ray R(pixelCoord, rayDirections);
             
-            float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), L, &colours, z );
+            float temp_value = triangle::intersection_value(R, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), L, &colours, z );
             value = value + temp_value;
         }
 
-        for(int z = 0; z<test_iterations; z++){
+        for(int z = 0; z<testIterations; z++){
             sum += colours[z]; 
         }
-        for(int z = 0; z<test_iterations; z++){
-            if(((colours)[z]/sum >1.0f/(float)test_iterations)&&(sum>0)){ //if one ray differs significantly then test more.
+        for(int z = 0; z<testIterations; z++){
+            if(((colours)[z]/sum >1.0f/(float)testIterations)&&(sum>0)){ //if one ray differs PointOnLightgnificantly then test more.
                 adaptive = 1;
             }
         }    
@@ -122,23 +122,23 @@ for (int obj_file_input = 1;  obj_file_input<2; obj_file_input++){
         if(adaptive==1){ //if needed used adaptive and repeat above.
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
-                vector3 Si = myLight.point_on_source();
-                vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-                vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
+                vector3 PointOnLight = myLight.point_on_source();
+                vector3 rayDirections = vector3::subtract(PointOnLight, pixelCoord); //from screen to light source
+                rayDirections.normalize();
+                vector3 L = vector3::subtract(pixelCoord, PointOnLight);
                 L.normalize();
-                ray_direction.normalize();
-                Ray R(s, ray_direction);
+                Ray R(pixelCoord, rayDirections);
 
-                float temp_value = triangle::intersection_value(R, root, V, FV, FT, VT, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), L, &colours, 0 );
+                float temp_value = triangle::intersection_value(R, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), L, &colours, 0 );
                 value = value + temp_value;
             }
         }
         delete[] colours;
         
-//Using Monte Carlo, average values.
-        float R = data[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
-        float G = data[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
-        float B = data[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+test_iterations)*myLight.get_illumination();
+//UPointOnLightng Monte Carlo, average values.
+        float R = data[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
+        float G = data[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
+        float B = data[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
         
         if(R>255.0f){ //clamp at 255
             R = 255.0f;
@@ -154,27 +154,26 @@ for (int obj_file_input = 1;  obj_file_input<2; obj_file_input++){
         img[x+2]=B ;
     }
   
-    std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); //write to bmp file.
+    std::ofstream image("puppet.bmp", std::ios::out| std::ios::binary); //write to bmp file.
     BITMAP_File_Header file_header;
     BITMAP_Info_Header info_header;
     fill_bitmap_headers(&file_header, &info_header,  width, height);
-    write_bitmap (&file_header, &info_header,&image2);
+    write_bitmap (&file_header, &info_header,&image);
     for(auto x = height-1; x>=0; x--){
         for (auto y = 0; y < width; y++) {
             for(auto z =2; z>=0; z--){
-            image2<<img[x*width*3 + y*3+ z];
+            image<<img[x*width*3 + y*3+ z];
             }
         }
     }
-    image2.close();
+    image.close();
 
 
 
 //Clear up files.
-	ObjFile::clean_up(V,N, VT, FV, FN, FT);
+	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures);
     search_tree::delete_tree(root);
     delete [] img;
-
 }
     delete [] data;
     delete [] PuppetTexture;

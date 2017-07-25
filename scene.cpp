@@ -19,13 +19,13 @@ scene::scene(int xres, int yres, float fieldOfView, float focalLength, vector3 o
     Camera_lookat.setValue(lookat.x(), lookat.y(), lookat.z());
     Camera_lookup.setValue(lookup.x(), lookup.y(), lookup.z());
 
-    eye_n = vector3::vec_add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat)); //camera coord system
+    eye_n = vector3::add(Camera_origin, vector3::vec_scal_mult(-1,  Camera_lookat)); //camera coord system
     eye_n.normalize();
     eye_u = vector3::crossproduct(Camera_lookup, eye_n);
     eye_u.normalize();
     eye_v = vector3::crossproduct(eye_n,eye_u); 
-    Centre_of_image = vector3::vec_add(Camera_origin,vector3::vec_scal_mult(-focal_length,eye_n));     
-    top_left = vector3::vec_add3(Centre_of_image, vector3::vec_scal_mult(-width/2.0f,eye_u), vector3::vec_scal_mult(height/2.0f, eye_v));
+    Centre_of_image = vector3::add(Camera_origin,vector3::vec_scal_mult(-focal_length,eye_n));     
+    top_left = vector3::add3(Centre_of_image, vector3::vec_scal_mult(-width/2.0f,eye_u), vector3::vec_scal_mult(height/2.0f, eye_v));
     ratio = width/(float)x_res;
 }
 
@@ -44,7 +44,7 @@ vector3 light::point_on_source(void){ //calculates random point on light source
     float b = uniform_random_number();
     vector3 tangent_v(0,1,0);
     vector3 tangent_u(1,0,0);
-    vector3 Si = vector3::vec_add3(centre, vector3::vec_scal_mult((0.5 - a)*2*x_min,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*x_max,tangent_v));
+    vector3 Si = vector3::add3(centre, vector3::vec_scal_mult((0.5 - a)*2*x_min,tangent_u), vector3::vec_scal_mult((0.5 -b)*2*x_max,tangent_v));
     return Si;
 }
    
@@ -60,7 +60,7 @@ vector3 sphere_light::point_on_source(void){
 }
 
 float sphere_light::intensity(vector3 point){ //inverse square law for light reduction
-    vector3 diff = vector3::vec_add(centre, vector3::vec_scal_mult(-1, point));
+    vector3 diff = vector3::add(centre, vector3::vec_scal_mult(-1, point));
     float min_diff = (centre.z()-point.z())*(centre.z()-point.z());
     float d = abs(vector3::dotproduct(diff, diff))/min_diff;
     return 10.0f/(d*4.0f*PI);

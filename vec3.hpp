@@ -32,7 +32,7 @@ class vector3{
             vector3 vec(x,y,z);
             return vec;
         }
-        static inline vector3 vec_add(vector3 v1, vector3 v2){
+        static inline vector3 add(vector3 v1, vector3 v2){
             float x,y,z;
             x = v1.x()+v2.x();
             y = v1.y()+v2.y();
@@ -40,7 +40,15 @@ class vector3{
             vector3 vec(x,y,z);
             return vec;
         }
-        static inline vector3 vec_add3(vector3 v1, vector3 v2, vector3 v3){
+          static inline vector3 subtract(vector3 v1, vector3 v2){
+            float x,y,z;
+            x = v1.x()-v2.x();
+            y = v1.y()-v2.y();
+            z = v1.z()-v2.z();
+            vector3 vec(x,y,z);
+            return vec;
+        }
+        static inline vector3 add3(vector3 v1, vector3 v2, vector3 v3){
             float x,y,z;
             x = v1.x()+v2.x()+v3.x();
             y = v1.y()+v2.y()+v3.y();

@@ -14,7 +14,7 @@ triangle::triangle(vector3 V1, vector3 V2, vector3 V3){ //triangle constructor
     vertex2.setValue(V2.x(), V2.y(), V2.z());
     vertex3.setValue(V3.x(), V3.y(), V3.z());
 
-    vector3 N = vector3::crossproduct(vector3::vec_add(vertex2, vector3::vec_scal_mult(-1, vertex1)), vector3::vec_add(vertex3, vector3::vec_scal_mult(-1, vertex1)));
+    vector3 N = vector3::crossproduct(vector3::add(vertex2, vector3::vec_scal_mult(-1, vertex1)), vector3::add(vertex3, vector3::vec_scal_mult(-1, vertex1)));
     N.normalize();
     normal.setValue(N.x(), N.y(), N.z()); 
     plane_constant = vector3::dotproduct(normal, vertex1); //n.x = d
@@ -26,12 +26,12 @@ float triangle::ray_triangle_intersection(Ray R){
               return 0;
     }
     float t=(plane_constant - vector3::dotproduct(normal,R.get_origin()))/r; //t where ray-plane intersection occurred
-    vector3 intersection_point = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t,  R.get_direction())); //POI
+    vector3 intersection_point = vector3::add(R.get_origin(), vector3::vec_scal_mult(t,  R.get_direction())); //POI
 
     if( //test if inside triangle
-    (vector3::dotproduct(vector3::crossproduct(vector3::vec_add(vertex2, vector3::vec_scal_mult(-1, vertex1)), vector3::vec_add(intersection_point, vector3::vec_scal_mult(-1, vertex1))), normal)>=-0.00001f)&&
-    (vector3::dotproduct(vector3::crossproduct(vector3::vec_add(vertex3, vector3::vec_scal_mult(-1, vertex2)), vector3::vec_add(intersection_point,vector3::vec_scal_mult(-1, vertex2))), normal)>=-0.00001f)&&
-    (vector3::dotproduct(vector3::crossproduct(vector3::vec_add(vertex1, vector3::vec_scal_mult(-1, vertex3)), vector3::vec_add(intersection_point, vector3::vec_scal_mult(-1, vertex3))), normal)>=-0.00001f))
+    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex2, vector3::vec_scal_mult(-1, vertex1)), vector3::add(intersection_point, vector3::vec_scal_mult(-1, vertex1))), normal)>=-0.00001f)&&
+    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex3, vector3::vec_scal_mult(-1, vertex2)), vector3::add(intersection_point,vector3::vec_scal_mult(-1, vertex2))), normal)>=-0.00001f)&&
+    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex1, vector3::vec_scal_mult(-1, vertex3)), vector3::add(intersection_point, vector3::vec_scal_mult(-1, vertex3))), normal)>=-0.00001f))
     {
         return t;
     }
@@ -69,7 +69,7 @@ float triangle::ray_triangle_intersection(Ray R){
         }
         for (int z=0; z<(*k)[0]; z++){ //find closest intersection.
             if ((t_values[z]>0)){
-                vector3 xyz = vector3::vec_add( R.get_origin(), vector3::vec_scal_mult(t_values[z],R.get_direction()));
+                vector3 xyz = vector3::add( R.get_origin(), vector3::vec_scal_mult(t_values[z],R.get_direction()));
                 if (t_values[z]<t_min){
                     t_min =t_values[z];
                     *min_value = z;
@@ -90,9 +90,9 @@ void triangle::get_texture_value(int triangle_value, int* FV, float *V, Ray R, u
     vector3 point1(V[3*index1], V[3*index1+1], V[3*index1+2]);
     vector3 point2(V[3*index2], V[3*index2+1], V[3*index2+2]);
     vector3 point3(V[3*index3], V[3*index3+1], V[3*index3+2]);
-    vector3 T = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(-1, point1));
-    vector3 E1 = vector3::vec_add(point2, vector3::vec_scal_mult(-1, point1));
-    vector3 E2 = vector3::vec_add(point3, vector3::vec_scal_mult(-1, point1));
+    vector3 T = vector3::add(R.get_origin(), vector3::vec_scal_mult(-1, point1));
+    vector3 E1 = vector3::add(point2, vector3::vec_scal_mult(-1, point1));
+    vector3 E2 = vector3::add(point3, vector3::vec_scal_mult(-1, point1));
     denominator = vector3::dotproduct( vector3::crossproduct(R.get_direction(), E2), E1);
     vector3 M (vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.get_direction(), E2), T),vector3::dotproduct( vector3::crossproduct(T, E1), R.get_direction()));
     vector3 tuv = vector3::vec_scal_mult(1.0f/(float)denominator, M);
@@ -157,8 +157,8 @@ float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int
         int triangle = k[min_value+1]; //triangle which has intersected with ray.
         float* colour = new float[3];
         triangle::get_texture_value(triangle, FV, vertices, R, puppet_tex, FT, VT, puppet_width, puppet_height, &colour); //find value of texture at POI
-        vector3 POI = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min,  R.get_direction()));  
-        vector3 dis = vector3::vec_add(POI, vector3::vec_scal_mult(-1, R.get_origin()));
+        vector3 POI = vector3::add(R.get_origin(), vector3::vec_scal_mult(t_min,  R.get_direction()));  
+        vector3 dis = vector3::add(POI, vector3::vec_scal_mult(-1, R.get_origin()));
         float dist = sqrt(vector3::dotproduct(dis,dis));
         float alpha = fabs(dist)/50.0f; //distance function for level of blending
 
@@ -186,14 +186,14 @@ float triangle::intersection_value_s(Ray Rl,Ray R, search_tree* root, float* V, 
     int min_value = -1, *k,min_value2 = -1, *k2;
     float value;
     float t_min = triangle::intersection_point(root, V, Rl,FV, &min_value, &k);
-    vector3 POI = vector3::vec_add(Rl.get_origin(), vector3::vec_scal_mult(t_min,  Rl.get_direction()));  
-    vector3 dis = vector3::vec_add(POI, vector3::vec_scal_mult(-1, Rl.get_origin()));
+    vector3 POI = vector3::add(Rl.get_origin(), vector3::vec_scal_mult(t_min,  Rl.get_direction()));  
+    vector3 dis = vector3::add(POI, vector3::vec_scal_mult(-1, Rl.get_origin()));
     float dist = sqrt(vector3::dotproduct(dis,dis));
     float alpha = fabs(dist)/15.0f; //distance function for level of blending
                    
     float t_min2 = triangle::intersection_point(root, V, R,FV, &min_value2, &k2);     
-    vector3 POI2 = vector3::vec_add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
-    vector3 dis2 = vector3::vec_add(POI2, vector3::vec_scal_mult(-1, R.get_origin()));
+    vector3 POI2 = vector3::add(R.get_origin(), vector3::vec_scal_mult(t_min2,  R.get_direction()));  
+    vector3 dis2 = vector3::add(POI2, vector3::vec_scal_mult(-1, R.get_origin()));
     float dist2 = sqrt(vector3::dotproduct(dis2,dis2));
     float alpha2 = fabs(dist2)/15.0f; //distance function for level of blending
    
