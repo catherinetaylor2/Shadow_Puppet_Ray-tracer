@@ -29,13 +29,13 @@ int main(int argc, char* argv[] ){
 //Input screen texture data
     unsigned char * data;
 	int ScreenTextureWidth, ScreenTextureHeight;
-	data = readBMP("sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
+	data = readBMP("Textures/sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
     std::cout<<"width "<<ScreenTextureWidth<<" "<<ScreenTextureHeight<<"\n";
 
 //Input puppet texture data   
-    unsigned char * puppet_tex;
-	int puppet_width, puppet_height;
-	puppet_tex = readBMP("turtle_texture.bmp", &puppet_width, &puppet_height);
+    unsigned char *PuppetTexture;
+	int PuppetTextureWidth, PuppetTextureHeight;
+	PuppetTexture = readBMP("Textures/turtle_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
 
     int width, height;
 	if(argc>1){
@@ -50,7 +50,7 @@ int main(int argc, char* argv[] ){
 //Puppet mesh inputs
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
-    ObjFile mesh_dino("quad_t.obj");
+    ObjFile mesh_dino("Objects/quad_t.obj");
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;
@@ -77,28 +77,28 @@ int main(int argc, char* argv[] ){
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 s = vector3::add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.get_u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.get_v()) );
+        vector3 s = vector3::add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.v()) );
 
         float value = 0,sum =0;
         int adaptive = 0, test_iterations = 25 ; 
         float* colours = new float[test_iterations];
         #pragma omp parallel for
         for(int z =0; z <test_iterations; z++){
-            vector3 Si = inner_light.point_on_source();
+            vector3 Si = inner_light.PointOnSource();
             vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
             vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
             L.normalize();
             ray_direction.normalize();
             Ray R(s, ray_direction);
 
-            vector3 Sil =outer_light.point_on_source();
+            vector3 Sil =outer_light.PointOnSource();
             vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
             vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
             Ll.normalize();
             ray_directionl.normalize();
             Ray Rl(s, ray_directionl);
 
-            float temp_value = triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  z, inner_light, outer_light);        
+            float temp_value = triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, inner_light.get_normal(), L, &colours,  z, inner_light, outer_light);        
             value = value + temp_value;
         }
 
@@ -115,21 +115,21 @@ int main(int argc, char* argv[] ){
         if(adaptive==1){
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
-                vector3 Si = inner_light.point_on_source();
+                vector3 Si = inner_light.PointOnSource();
                 vector3 ray_direction(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
                 vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
                 L.normalize();
                 ray_direction.normalize();
                 Ray R(s, ray_direction);
 
-                vector3 Sil =outer_light.point_on_source();
+                vector3 Sil =outer_light.PointOnSource();
                 vector3 ray_directionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
                 vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
                 Ll.normalize();
                 ray_directionl.normalize();
                 Ray Rl(s, ray_directionl);
 
-                float temp_value =  triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT, puppet_tex, puppet_width, puppet_height, inner_light.get_normal(), L, &colours,  0, inner_light, outer_light);        
+                float temp_value =  triangle::intersection_value_s(Rl, R, root, V, FV, FT, VT,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, inner_light.get_normal(), L, &colours,  0, inner_light, outer_light);        
                 value = value + temp_value;
             }
         }
@@ -170,7 +170,7 @@ int main(int argc, char* argv[] ){
 
 	ObjFile::clean_up(V,N, VT, FV, FN, FT);
     search_tree::delete_tree(root);
-    delete[] puppet_tex;
+    delete[]PuppetTexture;
     delete[] data;
     delete[] img;
 

@@ -39,7 +39,7 @@ light::light(float light_length, float light_illumination, vector3 C){ //sets up
     centre.setValue(C.x(), C.y(), C.z()); //set at centre of screen.
     direction.setValue(0.0f,0.0f,-1.0f);
 }
-vector3 light::point_on_source(void){ //calculates random point on light source
+vector3 light::PointOnSource(void){ //calculates random point on light source
     float a = uniform_random_number();
     float b = uniform_random_number();
     vector3 tangent_v(0,1,0);
@@ -52,7 +52,7 @@ sphere_light::sphere_light(vector3 sphere_centre, float sphere_radius){ //spheri
     centre.setValue(sphere_centre.x(), sphere_centre.y(), sphere_centre.z());
     radius = sphere_radius;
 } 
-vector3 sphere_light::point_on_source(void){
+vector3 sphere_light::PointOnSource(void){
     float a = uniform_random_number()*270.0f; 
     float b = uniform_random_number()*90.0f+90.0f; 
     vector3 Si((float)radius*sin(b/180.0f*PI)*sin(a/180.0f*PI)+centre.x(), (float)radius*sin(b/180.0f*PI)*cos(a/180.0f*PI)+centre.y(),(float)radius*cos(b/180.0f*PI)+centre.z());

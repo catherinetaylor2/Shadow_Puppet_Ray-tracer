@@ -31,10 +31,10 @@ class scene{
         vector3 get_n(void){
             return eye_n;
         }
-        vector3 get_u(void){
+        vector3 u(void){
             return eye_u;
         }
-        vector3 get_v(void){
+        vector3 v(void){
             return eye_v;
         }
         float get_ratio(void){
@@ -83,7 +83,7 @@ class light{ //assuming square light
         vector3 get_normal(void){
             return direction;
         }
-        vector3 point_on_source(void);
+        vector3 PointOnSource(void);
        
     private:
         vector3 centre;
@@ -105,7 +105,7 @@ class sphere_light{ //spherical light source
         float get_radius(void){
             return radius;
         }
-        vector3 point_on_source(void);
+        vector3 PointOnSource(void);
         float intensity(vector3 point);
     private:
         vector3 centre;
