@@ -77,7 +77,7 @@ int main(int argc, char* argv[] ){
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 s = vector3::add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.v()) );
+        vector3 s = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) );
 
         float value = 0,sum =0;
         int adaptive = 0, test_iterations = 25 ; 

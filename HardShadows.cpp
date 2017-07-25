@@ -7,7 +7,6 @@
 //Produces hard shadow puppets
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -44,7 +43,7 @@ int main(int argc, char* argv[] ){
 
 
 for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
-    std::string j;
+        std::string j;
 
         if(ObjFileInput < 10){
 			j = "000"+std::to_string(ObjFileInput);
@@ -85,7 +84,7 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::vec_scal_mult(1*i*myScene.get_ratio(),myScene.u()), vector3::vec_scal_mult(-1*j*myScene.get_ratio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
+        vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
 
         float value = 0.0f, sum = 0.0f;
         int adaptive = 0, testIterations = 25 ; //initial values for adaptive sampling
@@ -100,15 +99,15 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
             LightRayDirection.normalize();
             Ray RayFired(pixelCoord, rayDirections);
             
-            float temp_value = triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &colours, z );
-            value = value + temp_value;
+            value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &colours, z );
+            
         }
 
         for(int z = 0; z<testIterations; ++z){
             sum += colours[z]; 
         }
         for(int z = 0; z<testIterations; ++z){
-            if(((colours)[z]/sum >1.0f/(float)testIterations)&&(sum>0)){ //if one ray differs PointOnLightgnificantly then test more.
+            if(((colours)[z]/sum >1.0f/(float)testIterations)&&(sum>0)){ //if one ray differssignificantly then test more.
                 adaptive = 1;
             }
         }    
@@ -124,8 +123,8 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
                 LightRayDirection.normalize();
                 Ray RayFired(pixelCoord, rayDirections);
 
-                float temp_value = triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &colours, 0 );
-                value = value + temp_value;
+                value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &colours, 0 );
+                
             }
         }
         delete[] colours;

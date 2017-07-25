@@ -24,7 +24,7 @@ class vector3{
             vector3 vec(i, j, k);
             return vec;
         }
-        static vector3 vec_scal_mult(float c, vector3 v){
+        static vector3 ScalarMultiply(float c, vector3 v){
             float x,y,z;
             x = c*v.x();
             y=c*v.y();
