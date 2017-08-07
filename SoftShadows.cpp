@@ -4,13 +4,12 @@
 //
 // Began May 2017
 //
-//Produces sofaceTextures shadow puppets
+//Produces soft shadow puppets
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <cmath>
-#include <thread>
 #include <algorithm>
 #include "Read_Obj.hpp"
 #include "vec3.hpp"
@@ -34,8 +33,7 @@ int main(int argc, char* argv[] ){
 		width = 500, height = 500;
 	}
 
-//Input texture data
-    unsigned char * ScreenData, *PuppetTexture;
+    unsigned char * ScreenData, *PuppetTexture; //Input texture data
 	int ScreenTextureWidth, ScreenTextureHeight, PuppetTextureWidth, PuppetTextureHeight;
 	ScreenData = readBMP("Textures/sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
      if(ScreenData == 0){
@@ -46,15 +44,12 @@ int main(int argc, char* argv[] ){
     if(PuppetTexture == 0){
         std::cerr<<"Error: Puppet textures does not exist \n";
         return -1;
-    }
+    }  
 
-  
-
-//Puppet mesh inputs
-    float *vertices, *normals, *textures;
+    float *vertices, *normals, *textures; //Puppet mesh inputs
     int NumberOfFaces, *faceVertices, *faceNormals, *faceTextures;
     ObjFile PuppetMesh("Objects/quad.obj");
-      if(PuppetMesh.doesExist()==false){
+    if(PuppetMesh.doesExist()==false){
         std::cerr<<"Error: Object does not exist \n";
         return -1;
     }
@@ -65,11 +60,9 @@ int main(int argc, char* argv[] ){
 	search_tree::build_tree(vertices, faceVertices, &leafNodes, &root);
 	std::cout<<"tree built \n";
 
-//Camera input
-    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);
+    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f); //Camera input
 
-//Scene set up
-    scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
+    scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup); //Scene set up
     float innerLightLength = 0.1f, outerLightLength = 8.0f;
     vector3 innerCentre(0.0f, 0.0f, 50.0f), outerCentre(0.0f, 0.0f, 70.0f);
     light innerLight(innerLightLength,1.0f, innerCentre);
@@ -84,64 +77,63 @@ int main(int argc, char* argv[] ){
         i=(x/(3))%(myScene.get_x_res());
         j=(x/(3))/(myScene.get_x_res());
 
-        vector3 s = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) );
+        vector3 PointOnScreen = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) );
 
-        float value = 0,sum =0;
-        int adaptive = 0, testIterations = 25 ; 
-        float* colours = new float[testIterations];
+        int testIterations = 25 ; 
+        float value = 0.0f, PixelColourSum = 0.0f, *intersectionColours = new float[testIterations];
+        bool adaptive = false;
+
         #pragma omp parallel for
         for(int z =0; z <testIterations; z++){
-            vector3 Si = innerLight.PointOnSource();
-            vector3 rayDirection(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-            vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
-            L.normalize();
+            vector3 PointOnInnerLight = innerLight.PointOnSource();
+            vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(), PointOnInnerLight.z()-PointOnScreen.z());
+            vector3 LightDirInner(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(), PointOnScreen.z()-PointOnInnerLight.z());
+            LightDirInner.normalize();
             rayDirection.normalize();
-            Ray R(s, rayDirection);
+            Ray rayInner(PointOnScreen, rayDirection);
 
-            vector3 Sil =outerLight.PointOnSource();
-            vector3 rayDirectionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
-            vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
-            Ll.normalize();
-            rayDirectionl.normalize();
-            Ray Rl(s, rayDirectionl);
+            vector3 PointOnOuterLight = outerLight.PointOnSource();
+            vector3 rayDirectionOuter(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(), PointOnOuterLight.z()-PointOnScreen.z());
+            vector3 LightDirOuter(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(), PointOnScreen.z()-PointOnOuterLight.z());
+            LightDirOuter.normalize();
+            rayDirectionOuter.normalize();
+            Ray rayOuter(PointOnScreen, rayDirectionOuter);
 
-            float tempValue = triangle::intersection_value_s(Rl, R, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), L, &colours,  z, innerLight, outerLight);        
-            value = value + tempValue;
+             value +=  triangle::intersection_value_s(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  z, innerLight, outerLight);        
         }
 
         for(int z = 0; z<testIterations; z++){
-            sum += colours[z]; 
+            PixelColourSum += intersectionColours[z]; 
         }
-        for(int z = 0; z<testIterations; z++){
-            if(((colours)[z]/sum >0.05)&&(sum>0)){
-                adaptive = 1;
+        for(int z = 0; z<testIterations; z++){ //determine if one ray differs significantly
+            if(((intersectionColours)[z]/PixelColourSum >0.05)&&(PixelColourSum>0)){
+                adaptive = true;
             }
-        }
-        delete [] colours;      
+        } 
 
-        if(adaptive==1){
+        if(adaptive==true){
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
-                vector3 Si = innerLight.PointOnSource();
-                vector3 rayDirection(Si.x()-s.x(), Si.y()-s.y(), Si.z()-s.z());
-                vector3 L(s.x() - Si.x(), s.y() - Si.y(), s.z()-Si.z());
-                L.normalize();
+                vector3 PointOnInnerLight = innerLight.PointOnSource();
+                vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(), PointOnInnerLight.z()-PointOnScreen.z());
+                vector3 LightDirInner(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(), PointOnScreen.z()-PointOnInnerLight.z());
+                LightDirInner.normalize();
                 rayDirection.normalize();
-                Ray R(s, rayDirection);
+                Ray rayInner(PointOnScreen, rayDirection);
 
-                vector3 Sil =outerLight.PointOnSource();
-                vector3 rayDirectionl(Sil.x()-s.x(), Sil.y()-s.y(), Sil.z()-s.z());
-                vector3 Ll(s.x() - Sil.x(), s.y() - Sil.y(), s.z()-Sil.z());
-                Ll.normalize();
-                rayDirectionl.normalize();
-                Ray Rl(s, rayDirectionl);
+                vector3 PointOnOuterLight =outerLight.PointOnSource();
+                vector3 rayDirectionOuter(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(), PointOnOuterLight.z()-PointOnScreen.z());
+                vector3 LightDirOuter(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(), PointOnScreen.z()-PointOnOuterLight.z());
+                LightDirOuter.normalize();
+                rayDirectionOuter.normalize();
+                Ray rayOuter(PointOnScreen, rayDirectionOuter);
 
-                float tempValue =  triangle::intersection_value_s(Rl, R, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), L, &colours,  0, innerLight, outerLight);        
-                value = value + tempValue;
+                value +=  triangle::intersection_value_s(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  0, innerLight, outerLight);        
             }
         }
+        delete [] intersectionColours; 
 
-         //Spherical light ScreenData:
+        //Using Monte Carlo, average values.
         float R = ScreenData[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+testIterations);
         float G = ScreenData[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+testIterations);
         float B = ScreenData[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+testIterations);
@@ -159,21 +151,19 @@ int main(int argc, char* argv[] ){
         img[x+1]= G;
         img[x+2]=B ;  
     }
-    std::ofstream image2("puppet.bmp", std::ios::out| std::ios::binary); 
+    std::ofstream image("puppet.bmp", std::ios::out| std::ios::binary); //write to bmp
     BITMAP_File_Header file_header;
     BITMAP_Info_Header info_header;
     fill_bitmap_headers(&file_header, &info_header,  width, height);
-    write_bitmap (&file_header, &info_header,&image2);
+    write_bitmap (&file_header, &info_header,&image);
     for(auto x = height-1; x>=0; x--){
         for (auto y = 0; y < width; y++) {
             for(auto z =2; z>=0; z--){
-            image2<<img[x*width*3 + y*3+ z];
+            image<<img[x*width*3 + y*3+ z];
             }
         }
     }
-    image2.close();
-
-    std::cout<<"done \n";
+    image.close();
 
 	ObjFile::clean_up(vertices, normals, textures, faceVertices, faceNormals, faceTextures);
     search_tree::delete_tree(root);

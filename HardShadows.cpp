@@ -24,6 +24,15 @@
 
 int main(int argc, char* argv[] ){
 
+    int width, height;
+	if(argc>1){
+		width = atoi(argv[1]);
+		height = atoi(argv[2]);
+	}
+	else{
+		width = 500, height = 500;
+	}
+
     unsigned char * TextureData, * PuppetTexture;
 	int ScreenTextureWidth, ScreenTextureHeight,  PuppetTextureWidth, PuppetTextureHeight;
 	TextureData = readBMP("Textures/sheet_5.bmp", &ScreenTextureWidth, &ScreenTextureHeight); //Screen texture input
@@ -36,20 +45,7 @@ int main(int argc, char* argv[] ){
         std::cerr<<"Error: Puppet texture does not exist \n";
         return -1;
     }
-    std::cout<<"Texture bitmaps loaded\n";
-
-    int width, height;
-	if(argc>1){
-		width = atoi(argv[1]);
-		height = atoi(argv[2]);
-	}
-	else{
-		width = 500;
-		height = 500;
-	}
-
-    //Quad mesh inputs
-    float *vertices, *normals, *Textures;
+    float *vertices, *normals, *Textures;     //Quad mesh inputs
     int numberOfFaces, *faceVertices, *faceNormals, *faceTextures;
     ObjFile DinoMesh("Objects/quad.obj");
     if(DinoMesh.doesExist()==false){
@@ -61,13 +57,11 @@ int main(int argc, char* argv[] ){
     std::vector<search_tree*> LeafNodes;
     search_tree::leaf_nodes(vertices, faceVertices, numberOfFaces, &LeafNodes);
 	search_tree::build_tree(vertices, faceVertices, &LeafNodes, &root);
-	std::cout<<"tree built \n";
+	std::cout<<"Inputs loaded \n";
 
-    //Set up camera position
-    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);
+    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);  //Set up camera position
 
-    //Set up scene and light position.
-    scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup);
+    scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup); //Set up scene and light position.
     float LightLength = 0.25f;
     vector3 LightCentre(0.0f, 0.0f, 50.0f);
     light myLight(LightLength, 1.0f, LightCentre);
@@ -83,9 +77,9 @@ int main(int argc, char* argv[] ){
 
         vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
 
-        float value = 0.0f, PixelColourSum= 0.0f;
-        int adaptive = 0, testIterations = 25 ; //initial values for adaptive sampling
-        float* intersectionColours = new float[testIterations];
+        int testIterations = 25 ; //initial values for adaptive sampling
+        float value = 0.0f, PixelColourSum= 0.0f, *intersectionColours = new float[testIterations];
+        bool adaptive = false;
 
         #pragma omp parallel for
         for(int z =0; z <testIterations; ++z){
@@ -95,33 +89,28 @@ int main(int argc, char* argv[] ){
             vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
             LightRayDirection.normalize();
             Ray RayFired(pixelCoord, rayDirections);
-            
             value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
-            
         }
 
         for(int z = 0; z<testIterations; ++z){
-            PixelColourSum+= intersectionColours[z]; 
+            PixelColourSum += intersectionColours[z]; 
         }
         for(int z = 0; z<testIterations; ++z){
             if(((intersectionColours)[z]/PixelColourSum>1.0f/(float)testIterations)&&(PixelColourSum>0)){ //if one ray differs significantly then test more.
-                adaptive = 1;
+                adaptive = true;
             }
         }    
 
-        if(adaptive==1){ //if needed used adaptive and repeat above.
+        if(adaptive==true){ //if needed used adaptive and repeat above.
             #pragma omp parallel for 
             for (int l=0; l<iterations; ++l){
-                
                 vector3 PointOnLight = myLight.PointOnSource();
                 vector3 rayDirections = vector3::subtract(PointOnLight, pixelCoord); //from screen to light source
                 rayDirections.normalize();
                 vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
                 LightRayDirection.normalize();
                 Ray RayFired(pixelCoord, rayDirections);
-
                 value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
-                
             }
         }
         delete[] intersectionColours;
@@ -159,8 +148,7 @@ int main(int argc, char* argv[] ){
     }
     image.close();
 
-//Clear up files.
-	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures);
+	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures); //Clear up files.
     search_tree::delete_tree(root);
     delete [] img;
     delete [] TextureData;
