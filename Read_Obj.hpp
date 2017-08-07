@@ -29,7 +29,7 @@ class ObjFile{
 		std::string fn;
         int NumberOfNormals = 0;
         int NumberOfVertices = 0;
-        int NumberOfFaces;
+        int NumberOfFaces = -1;
         bool exist;
 };
 #endif
