@@ -4,33 +4,33 @@
 #include "vec3.hpp"
 
 vector3::vector3(float x, float y, float z){
-    x_val=x;
-    y_val=y;
-    z_val=z;
+    xVal=x;
+    yVal=y;
+    zVal=z;
 }
 vector3::vector3(){
-    x_val=0.0f;
-    y_val=0.0f;
-    z_val=0.0f;
+    xVal=0.0f;
+    yVal=0.0f;
+    zVal=0.0f;
 }
 float vector3::x(void){
-    return x_val;
+    return xVal;
 }
 float vector3::y(void){
-    return y_val;
+    return yVal;
 }
 float vector3::z(void){
-    return z_val;
+    return zVal;
 }
 void vector3::setValue(float x, float y, float z){
-    x_val=x;
-    y_val=y;
-    z_val=z;
+    xVal=x;
+    yVal=y;
+    zVal=z;
 }
 void vector3::normalize(void){
-    float sum = sqrt(x_val*x_val + y_val*y_val + z_val*z_val);
-    x_val/= sum;
-    y_val/= sum;
-    z_val/= sum;
+    float sum = sqrt(xVal*xVal + yVal*yVal + zVal*zVal);
+    xVal/= sum;
+    yVal/= sum;
+    zVal/= sum;
 }
 

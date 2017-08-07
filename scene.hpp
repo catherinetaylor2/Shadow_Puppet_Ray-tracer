@@ -7,110 +7,45 @@
 class scene{
     public:
         scene(int xres, int yres, float fieldOfView, float focalLength, vector3 origin, vector3 lookat, vector3 lookup);
-        int get_x_res(void){
-            return x_res;
-        }
-        int get_y_res(void){
-            return y_res;
-        }
-        float get_width(void){
-            return width;
-        }
-        float get_height(void){
-            return height;
-        }
-        float get_distance_to_image(void){
-            return focal_length;
-        }
-        vector3 get_centre(void){
-            return Centre_of_image;
-        }
-        vector3 get_corner(void){
-            return top_left;
-        }
-        vector3 get_n(void){
-            return eye_n;
-        }
-        vector3 u(void){
-            return eye_u;
-        }
-        vector3 v(void){
-            return eye_v;
-        }
-        float get_ratio(void){
-            return ratio;
-        }
+        int getXRes(void) {return xRes;}
+        int getYRes(void) {return yRes;}
+        float getWidth(void) {return width;}
+        float getHeight(void) {return height;}
+        float getDistanceToImage(void) {return focalLength;}
+        vector3 getCentre(void) {return centreOfImage;}
+        vector3 getCorner(void) {return topLeft;}
+        vector3 n(void) {return eyeN;}
+        vector3 u(void) {return eyeU;}
+        vector3 v(void) {return eyeV;}
+        float getRatio(void) {return ratio;}
     private:
-        int x_res;
-        int y_res;
-        float width;
-        float height;
-        float focal_length;
+        int xRes, yRes;
+        float width, height;
+        float focalLength;
         float ratio;
-        vector3 Camera_origin;
-        vector3 Camera_lookat;
-        vector3 Camera_lookup;
-        vector3 Centre_of_image;
-        vector3 top_left;       
-        vector3 eye_n;
-        vector3 eye_u;
-        vector3 eye_v;
+        vector3 cameraOrigin, cameraLookat, cameraLookup;
+        vector3 centreOfImage;
+        vector3 topLeft;       
+        vector3 eyeN, eyeU, eyeV;
 };
 class light{ //assuming square light
     public:
-        light(float light_length,float light_illumination, vector3 C);
-        float get_xmin(void){
-            return x_min;
-        }
-        float get_xmax(void){
-            return x_max;
-        }
-        float get_ymin(void){
-            return y_min;
-        }
-        float get_ymax(void){
-            return y_max;
-        }
-        float get_z(void){
-            return z_coord;
-        }
-        float get_illumination(void){
-            return illumination;
-        }
-        vector3 get_centre(void){
-            return centre;
-        }
-        vector3 get_normal(void){
-            return direction;
-        }
+        light(float lightLength,float lightIllumination, vector3 _centre);
+        float getXmin(void) {return xMin;}
+        float get_xmax(void) {return xMax;}
+        float getYmin(void) {return yMin;}
+        float getYmax(void) {return yMax;}
+        float z(void) {return zCoord;}
+        float get_illumination(void) {return illumination;}
+        vector3 getCentre(void) {return centre;}
+        vector3 get_normal(void) {return direction;}
         vector3 PointOnSource(void);
-       
     private:
         vector3 centre;
         vector3 direction;
-        float x_min;
-        float x_max;
-        float y_min;
-        float y_max;
-        float z_coord;
+        float xMin, xMax;
+        float yMin, yMax;
+        float zCoord;
         float illumination;
-
-};
-class sphere_light{ //spherical light source
-    public:
-        sphere_light(vector3 sphere_centre,float sphere_radius);
-        vector3 get_centre(void){
-            return centre;
-        }
-        float get_radius(void){
-            return radius;
-        }
-        vector3 PointOnSource(void);
-        float intensity(vector3 point);
-    private:
-        vector3 centre;
-        float radius;
-        float illumination;
-
 };
 #endif

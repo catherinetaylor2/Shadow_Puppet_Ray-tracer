@@ -11,7 +11,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
-#include "Read_Obj.hpp"
+#include "ReadObj.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "BITMAP.hpp"
@@ -47,13 +47,13 @@ int main(int argc, char* argv[] ){
     }  
 
     float *vertices, *normals, *textures; //Puppet mesh inputs
-    int NumberOfFaces, *faceVertices, *faceNormals, *faceTextures;
+    int NumberOfFaces, *faceVertices, *faceNormals, *faceTextures, numberOfVertices;
     ObjFile PuppetMesh("Objects/quad.obj");
     if(PuppetMesh.doesExist()==false){
         std::cerr<<"Error: Object does not exist \n";
         return -1;
     }
-	PuppetMesh.getMeshData(PuppetMesh, &faceVertices, &faceNormals, &faceTextures, &textures, &normals, &vertices, &NumberOfFaces);
+	PuppetMesh.getMeshData(PuppetMesh, &faceVertices, &faceNormals, &faceTextures, &textures, &normals, &vertices, &NumberOfFaces, &numberOfVertices);
     binarySearchTree* root; 
     std::vector<binarySearchTree*> leafNodes;
     binarySearchTree::findLeafNodes(vertices, faceVertices, NumberOfFaces, &leafNodes);
@@ -70,14 +70,14 @@ int main(int argc, char* argv[] ){
 
     int iterations=100;
 
-	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
-    for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){
+	unsigned char *img = new unsigned char[3*myScene.getXRes()*myScene.getYRes()];
+    for (int x = 0; x<3*myScene.getXRes()*myScene.getYRes(); x+=3){
 
         int i, j;
-        i=(x/(3))%(myScene.get_x_res());
-        j=(x/(3))/(myScene.get_x_res());
+        i=(x/(3))%(myScene.getXRes());
+        j=(x/(3))/(myScene.getXRes());
 
-        vector3 PointOnScreen = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) );
+        vector3 PointOnScreen = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) );
 
         int testIterations = 25 ; 
         float value = 0.0f, PixelColourSum = 0.0f, *intersectionColours = new float[testIterations];

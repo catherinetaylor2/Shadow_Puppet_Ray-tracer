@@ -4,7 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
-#include"Read_Obj.hpp"
+#include"ReadObj.hpp"
 #include "vec3.hpp"
 
 #define infinity FLT_MAX
@@ -124,12 +124,12 @@ void ObjFile::getFaceData(int** faceVertices, int** faceNormals, int** faceTextu
   fclose(myObject);
 }
 
-void ObjFile::getMeshData(ObjFile mesh,int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces){
+void ObjFile::getMeshData(ObjFile mesh,int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces, int* NumberOfVertices){
 		mesh.getVertices(vertices);
 		mesh.getTextures(textures);
 		mesh.getNormals(normals);
 		mesh.getFaceData(faceVertices, faceNormals, faceTextures);
-    NumberOfVertices = mesh.getNumberOfVertices();
+    *NumberOfVertices = mesh.getNumberOfVertices();
 	  *NumberOfFaces = mesh.getNumberOfFaces();
 }
 void ObjFile::cleanUp(float*vertices, float* normals, float* textures,int* faceVertices, int* faceNormals, int* faceTextures){ //deletes pointers which are out of scope

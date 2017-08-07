@@ -11,7 +11,7 @@
 #include <cmath>
 #include <thread>
 #include <algorithm>
-#include "Read_Obj.hpp"
+#include "ReadObj.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "BITMAP.hpp"
@@ -46,13 +46,13 @@ int main(int argc, char* argv[] ){
         return -1;
     }
     float *vertices, *normals, *Textures;     //Quad mesh inputs
-    int numberOfFaces, *faceVertices, *faceNormals, *faceTextures;
+    int numberOfFaces, *faceVertices, *faceNormals, *faceTextures, numberOfVertices;
     ObjFile DinoMesh("Objects/quad.obj");
     if(DinoMesh.doesExist()==false){
         std::cerr<<"Error: Object does not exist \n";
         return -1;
     }
-	DinoMesh.getMeshData(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces);
+	DinoMesh.getMeshData(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces, &numberOfVertices);
     binarySearchTree* root; 
     std::vector<binarySearchTree*> LeafNodes;
     binarySearchTree::findLeafNodes(vertices, faceVertices, numberOfFaces, &LeafNodes);
@@ -67,15 +67,15 @@ int main(int argc, char* argv[] ){
     light myLight(LightLength, 1.0f, LightCentre);
 
     int iterations = 50; //number of rays per pixel
-	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
+	unsigned char *img = new unsigned char[3*myScene.getXRes()*myScene.getYRes()];
 
-    for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
+    for (int x = 0; x<3*myScene.getXRes()*myScene.getYRes(); x+=3){ //loops over all pixels
       
         int i, j;
-        i=(x/(3))%(myScene.get_x_res());
-        j=(x/(3))/(myScene.get_x_res());
+        i=(x/(3))%(myScene.getXRes());
+        j=(x/(3))/(myScene.getXRes());
 
-        vector3 pixelCoord = vector3::add3(myScene.get_corner(), vector3::ScalarMultiply(1*i*myScene.get_ratio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.get_ratio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
+        vector3 pixelCoord = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
 
         int testIterations = 25 ; //initial values for adaptive sampling
         float value = 0.0f, PixelColourSum= 0.0f, *intersectionColours = new float[testIterations];

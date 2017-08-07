@@ -24,7 +24,7 @@ class ObjFile{
         bool doesExist(void){
             return exist;
         }
-        void getMeshData(ObjFile mesh, int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces);
+        void getMeshData(ObjFile mesh, int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces, int* NumberOfVertices);
     private:
 		std::string fn;
         int NumberOfNormals = 0;

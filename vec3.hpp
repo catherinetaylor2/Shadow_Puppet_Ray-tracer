@@ -57,8 +57,8 @@ class vector3{
             return vec;
         }
     private:    
-        float x_val;
-        float y_val;
-        float z_val;
+        float xVal;
+        float yVal;
+        float zVal;
 };
 #endif
