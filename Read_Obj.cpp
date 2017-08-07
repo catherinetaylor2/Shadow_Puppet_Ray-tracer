@@ -22,7 +22,8 @@ ObjFile::ObjFile(std::string name){ //constructor
 void ObjFile::getVertices(float** vertices){ //find the vertices and store in array V
   char str[1000];
   float f1, f2, f3;
-  FILE *myObject = fopen(fn.c_str(), "r"); //opens object file
+  FILE * myObject;
+  myObject = fopen(fn.c_str(), "r"); //opens object file
 
   while (std::string(str) != "v"){ //scans file for specific arrangement of floats.
     fscanf(myObject, "%s%f%f%f", str, &f1, &f2, &f3);
@@ -48,8 +49,9 @@ void ObjFile::getVertices(float** vertices){ //find the vertices and store in ar
 void ObjFile::getNormals(float** normals){ //as above with normals.
   char str[1000];
   float f1, f2, f3;
-  FILE *myObject = fopen(fn.c_str(), "r");
+  FILE * myObject;
 
+  myObject = fopen(fn.c_str(), "r");
   while (std::string(str) != "vn"){
     fscanf(myObject, "%s%f%f%f", str, &f1, &f2, &f3);
   }
@@ -75,7 +77,8 @@ void ObjFile::getNormals(float** normals){ //as above with normals.
 void ObjFile::getTextures(float ** textures){ //get texture values.
   char str[1000];
   float f1, f2, f3;
-  FILE *myObject = fopen(fn.c_str(), "r");
+  FILE * myObject;
+  myObject = fopen(fn.c_str(), "r");
 
   *textures = new float[2*NumberOfVertices];
   while (std::string(str) != "v"){
@@ -94,8 +97,8 @@ void ObjFile::getFaceData(int** faceVertices, int** faceNormals, int** faceTextu
   char str[1000];
   float f;
   int i1, i2, i3, i4, i5, i6, i7, i8, i9, t;
-  FILE *myObject = fopen(fn.c_str(), "r");
-  
+  FILE * myObject;
+  myObject = fopen(fn.c_str(), "r");
   fscanf(myObject, "%s%f%f%f", str, &f, &f, &f);
   while (std::string(str) != "vn"){
     fscanf(myObject, "%s%f%f%f", str, &f, &f, &f);
