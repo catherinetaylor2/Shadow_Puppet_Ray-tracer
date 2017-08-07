@@ -21,28 +21,28 @@ ObjFile::ObjFile(std::string name){ //constructor
 
 void ObjFile::getVertices(float** vertices){ //find the vertices and store in array V
   char str[1000];
-  float f1, f2, f3;
-  FILE * myObject;
-  myObject = fopen(fn.c_str(), "r"); //opens object file
+  float f;
+  FILE *myObject  = fopen(fn.c_str(), "r"); //opens object file
+  int t =0;
 
   while (std::string(str) != "v"){ //scans file for specific arrangement of floats.
-    fscanf(myObject, "%s%f%f%f", str, &f1, &f2, &f3);
+    fscanf(myObject, "%s%f%f%f", str, &f, &f, &f);
+    t++;
   }
   do{  
-    fscanf(myObject, "%s%f%f%f" , str, &f1, &f2, &f3);
+    fscanf(myObject, "%s%f%f%f" , str, &f, &f, &f);
     NumberOfVertices ++;
   }while (std::string(str) != "vt");
   *vertices= new float[3*NumberOfVertices];
   rewind(myObject); //go back to start
-  while (std::string(str) != "v"){
-    fscanf(myObject, "%s%f%f%f" , str, &f1, &f2, &f3);
+  for(int i=0; i<t-1; i++){
+    fscanf(myObject, "%s%f%f%f" , str, &f, &f, &f);
   }
+
   for(int i=0; i<3*NumberOfVertices; i+=3){ //save values in array.
-    (*vertices)[i] = f1;
-    (*vertices)[i+1] = f2;
-    (*vertices)[i+2] = f3; 
-    fscanf(myObject, "%s%f%f%f", str, &f1, &f2, &f3);
+    fscanf(myObject, "%s%f%f%f", str, &(*vertices)[i], &(*vertices)[i+1], &(*vertices)[i+2]);
   }
+  fscanf(myObject, "%s%f%f%f", str, &f, &f, &f);
   fclose(myObject);
 }
 
