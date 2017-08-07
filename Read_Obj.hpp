@@ -7,29 +7,29 @@
 class ObjFile{
     public:
         ObjFile(std::string name);
-        void get_vertices(float** vertices);
-        void get_normals(float** normals);
-        void get_texture(float** texture_coords);
-        void get_face_data(int** face_vertex, int** face_normals, int** face_textures);
-        static void clean_up(float* vertices, float* normals, float* texture_coords,int* face_vertex, int* face_normals, int* face_textures);
-        int get_number_of_faces(void){
-            return number_of_faces;
+        void getVertices(float** vertices);
+        void getNormals(float** normals);
+        void getTextures(float** textures);
+        void getFaceData(int** faceVertices, int** faceNormals, int** faceTextures);
+        static void cleanUp(float* vertices, float* normals, float* textures,int* faceVertices, int* faceNormals, int* faceTextures);
+        int getNumberOfFaces(void){
+            return NumberOfFaces;
         }
-        int get_number_of_vertices(void){
-            return number_of_vertices;
+        int getNumberOfVertices(void){
+            return NumberOfVertices;
         }
-        std::string get_file_name(void){
+        std::string getFileName(void){
             return fn;
         }
         bool doesExist(void){
             return exist;
         }
-        void get_mesh_data(ObjFile mesh, int** face_vertex, int** face_normals, int** face_textures, float** texture_coords, float** normals, float** vertices, int* number_of_faces);
+        void getMeshData(ObjFile mesh, int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces);
     private:
 		std::string fn;
-        int number_of_normals;
-        int number_of_vertices;
-        int number_of_faces;
+        int NumberOfNormals = 0;
+        int NumberOfVertices = 0;
+        int NumberOfFaces;
         bool exist;
 };
 #endif

@@ -53,7 +53,7 @@ int main(int argc, char* argv[] ){
         std::cerr<<"Error: Object does not exist \n";
         return -1;
     }
-	PuppetMesh.get_mesh_data(PuppetMesh, &faceVertices, &faceNormals, &faceTextures, &textures, &normals, &vertices, &NumberOfFaces);
+	PuppetMesh.getMeshData(PuppetMesh, &faceVertices, &faceNormals, &faceTextures, &textures, &normals, &vertices, &NumberOfFaces);
     binarySearchTree* root; 
     std::vector<binarySearchTree*> leafNodes;
     binarySearchTree::findLeafNodes(vertices, faceVertices, NumberOfFaces, &leafNodes);
@@ -152,10 +152,10 @@ int main(int argc, char* argv[] ){
         img[x+2]=B ;  
     }
     std::ofstream image("puppet.bmp", std::ios::out| std::ios::binary); //write to bmp
-    BITMAP_File_Header file_header;
-    BITMAP_Info_Header info_header;
-    fill_bitmap_headers(&file_header, &info_header,  width, height);
-    write_bitmap (&file_header, &info_header,&image);
+    BITMAP_File_Header fileHeader;
+    BITMAP_Info_Header infoHeader;
+    fillBMPHeaders(&fileHeader, &infoHeader,  width, height);
+    writeBMP(&fileHeader, &infoHeader,&image);
     for(auto x = height-1; x>=0; x--){
         for (auto y = 0; y < width; y++) {
             for(auto z =2; z>=0; z--){
@@ -165,7 +165,7 @@ int main(int argc, char* argv[] ){
     }
     image.close();
 
-	ObjFile::clean_up(vertices, normals, textures, faceVertices, faceNormals, faceTextures);
+	ObjFile::cleanUp(vertices, normals, textures, faceVertices, faceNormals, faceTextures);
     binarySearchTree::deleteTree(root);
     delete[]PuppetTexture;
     delete[] ScreenData;

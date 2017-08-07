@@ -21,12 +21,12 @@ triangle::triangle(vector3 Vertex1, vector3 Vertex2, vector3 Vertex3){ //triangl
 }
 
 float triangle::RayTriangleIntersection(Ray R){
-    float r = vector3::dotproduct(normal, R.get_direction()); //check if intersects with plane
+    float r = vector3::dotproduct(normal, R.getDirection()); //check if intersects with plane
     if (fabs(r) < 0.000000001f){
               return 0;
     }
-    float t = (planeConstant - vector3::dotproduct(normal,R.get_origin()))/r; //t where ray-plane intersection occurred
-    vector3 intersectionPoint = vector3::add(R.get_origin(), vector3::ScalarMultiply(t,  R.get_direction())); //OuterPOI
+    float t = (planeConstant - vector3::dotproduct(normal,R.getOrigin()))/r; //t where ray-plane intersection occurred
+    vector3 intersectionPoint = vector3::add(R.getOrigin(), vector3::ScalarMultiply(t,  R.getDirection())); //OuterPOI
 
     if( //test if inside triangle
     (vector3::dotproduct(vector3::crossproduct(vector3::subtract(vertex2,vertex1), vector3::subtract(intersectionPoint, vertex1)), normal)>=-0.00001f)&&
@@ -68,7 +68,7 @@ float triangle::RayTriangleIntersection(Ray R){
         }
         for (int z=0; z<(*k)[0]; z++){ //find closest intersection.
             if ((t_values[z]>0)){
-                vector3 xyz = vector3::add( R.get_origin(), vector3::ScalarMultiply(t_values[z],R.get_direction()));
+                vector3 xyz = vector3::add( R.getOrigin(), vector3::ScalarMultiply(t_values[z],R.getDirection()));
                 if (t_values[z]<t_min){
                     t_min =t_values[z];
                     *minValue = z;
@@ -89,11 +89,11 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     vector3 point1(V[3*index1], V[3*index1+1], V[3*index1+2]);
     vector3 point2(V[3*index2], V[3*index2+1], V[3*index2+2]);
     vector3 point3(V[3*index3], V[3*index3+1], V[3*index3+2]);
-    vector3 T = vector3::add(R.get_origin(), vector3::ScalarMultiply(-1, point1));
+    vector3 T = vector3::add(R.getOrigin(), vector3::ScalarMultiply(-1, point1));
     vector3 E1 = vector3::add(point2, vector3::ScalarMultiply(-1, point1));
     vector3 E2 = vector3::add(point3, vector3::ScalarMultiply(-1, point1));
-    denominator = vector3::dotproduct( vector3::crossproduct(R.get_direction(), E2), E1);
-    vector3 M (vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.get_direction(), E2), T),vector3::dotproduct( vector3::crossproduct(T, E1), R.get_direction()));
+    denominator = vector3::dotproduct( vector3::crossproduct(R.getDirection(), E2), E1);
+    vector3 M (vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.getDirection(), E2), T),vector3::dotproduct( vector3::crossproduct(T, E1), R.getDirection()));
     vector3 tuv = vector3::ScalarMultiply(1.0f/(float)denominator, M);
     
     float *barycentric = new float[3]; //store barycentric coords
@@ -138,8 +138,8 @@ float triangle::getColour(Ray R, binarySearchTree* root, float*vertices, int* fa
         int triangle = k[minValue+1]; //triangle which has intersected with ray.
         float* colour = new float[3];
         triangle::getTextureValue(triangle, faceVertices, vertices, R, puppetTexture, faceTextures, Textures, puppetWidth, puppetHeight, &colour); //find value of texture at OuterPOI
-        vector3 OuterPOI = vector3::add(R.get_origin(), vector3::ScalarMultiply(t_min,  R.get_direction()));  
-        vector3 OuterDistVec = vector3::add(OuterPOI, vector3::ScalarMultiply(-1, R.get_origin()));
+        vector3 OuterPOI = vector3::add(R.getOrigin(), vector3::ScalarMultiply(t_min,  R.getDirection()));  
+        vector3 OuterDistVec = vector3::add(OuterPOI, vector3::ScalarMultiply(-1, R.getOrigin()));
         float OuterDist = sqrt(vector3::dotproduct(OuterDistVec,OuterDistVec));
         float alpha = fabs(OuterDist)/75.0f; //OuterDistance function for level of blending
 
@@ -167,14 +167,14 @@ float triangle::getColourSoft(Ray rayOuter, Ray rayInner, binarySearchTree* root
     int minValueOuter = -1, *kInner, minValueInner = -1, *kOuter;
     float value;
     float t_minOuter = triangle::getPOI(root, vertices, rayOuter,faceVertices, &minValueOuter, &kInner);
-    vector3 OuterPOI = vector3::add(rayOuter.get_origin(), vector3::ScalarMultiply(t_minOuter,  rayOuter.get_direction()));  
-    vector3 OuterDistVec = vector3::add(OuterPOI, vector3::ScalarMultiply(-1, rayOuter.get_origin()));
+    vector3 OuterPOI = vector3::add(rayOuter.getOrigin(), vector3::ScalarMultiply(t_minOuter,  rayOuter.getDirection()));  
+    vector3 OuterDistVec = vector3::add(OuterPOI, vector3::ScalarMultiply(-1, rayOuter.getOrigin()));
     float OuterDist = sqrt(vector3::dotproduct(OuterDistVec,OuterDistVec));
     float alpha = fabs(OuterDist)/15.0f; //OuterDistance function for level of blending
                    
     float t_minInner = triangle::getPOI(root, vertices, rayInner,faceVertices, &minValueInner, &kOuter);     
-    vector3 InnerOuterPOI = vector3::add(rayInner.get_origin(), vector3::ScalarMultiply(t_minInner,  rayInner.get_direction()));  
-    vector3 InnerDistVec = vector3::add(InnerOuterPOI, vector3::ScalarMultiply(-1, rayInner.get_origin()));
+    vector3 InnerOuterPOI = vector3::add(rayInner.getOrigin(), vector3::ScalarMultiply(t_minInner,  rayInner.getDirection()));  
+    vector3 InnerDistVec = vector3::add(InnerOuterPOI, vector3::ScalarMultiply(-1, rayInner.getOrigin()));
     float InnerDist = sqrt(vector3::dotproduct(InnerDistVec,InnerDistVec));
     float InnerAlpha = fabs(InnerDist)/15.0f; //OuterDistance function for level of blending
    

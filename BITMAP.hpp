@@ -32,8 +32,8 @@ typedef struct BITMAP_INFO_HEADER {
   DWORD biClrImportant;
 } BITMAP_Info_Header;
 
-void fill_bitmap_headers(BITMAP_File_Header *file_header, BITMAP_Info_Header *info_header, int width, int height);
-void write_bitmap (BITMAP_File_Header *file_header, BITMAP_Info_Header *info_header, std::ofstream *image);
-unsigned char* readBMP(char* filename, int* image_width, int* image_height); //REF SOURCE.
+void fillBMPHeaders(BITMAP_File_Header *fileHeader, BITMAP_Info_Header *infoHeader, int width, int height);
+void writeBMP(BITMAP_File_Header *fileHeader, BITMAP_Info_Header *infoHeader, std::ofstream *image);
+unsigned char* readBMP(char* filename, int* imageWidth, int* imageHeight); 
 
 #endif

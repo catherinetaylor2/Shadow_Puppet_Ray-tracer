@@ -6,7 +6,7 @@
 
 #define infinity FLT_MAX;
 
-Ray::Ray(vector3 o, vector3 d){
-    origin.setValue(o.x(), o.y(), o.z());
-    direction.setValue(d.x(), d.y(), d.z());
+Ray::Ray(vector3 _origin, vector3 _direction){
+    origin.setValue(_origin.x(), _origin.y(), _origin.z());
+    direction.setValue(_direction.x(), _direction.y(), _direction.z());
 }

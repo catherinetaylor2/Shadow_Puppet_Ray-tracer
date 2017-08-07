@@ -18,11 +18,11 @@
 
 bool BoundingBox::rayBoxIntersection(Ray R){ //find boxes which ray intersects with
     float tmin_y, tmax_y, tmin_z, tmax_z;
-    vector3 invDirection(1/(R.direction.x()), 1/R.direction.y(), 1/R.direction.z());
-    tmin = (parameters[0]- R.origin.x())*invDirection.x();
-    tmax = (parameters[1]-R.origin.x())*invDirection.x();
-    tmin_y = (parameters[2]- R.origin.y())*invDirection.y();
-    tmax_y = (parameters[3]- R.origin.y())*invDirection.y();
+    vector3 invDirection(1/(R.getDirection().x()), 1/R.getDirection().y(), 1/R.getDirection().z());
+    tmin = (parameters[0]- R.getOrigin().x())*invDirection.x();
+    tmax = (parameters[1]-R.getOrigin().x())*invDirection.x();
+    tmin_y = (parameters[2]- R.getOrigin().y())*invDirection.y();
+    tmax_y = (parameters[3]- R.getOrigin().y())*invDirection.y();
 
      if (tmin > tmax)std::swap(tmin, tmax); 
      if (tmin_y > tmax_y)std::swap(tmin_y, tmax_y);  
