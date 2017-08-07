@@ -9,7 +9,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
-#include <vector>
 #include <thread>
 #include <algorithm>
 #include "Read_Obj.hpp"
@@ -32,7 +31,7 @@ int main(int argc, char* argv[] ){
         std::cerr<<"Error: Screen texture does not exist \n";
         return -1;
     }
-	PuppetTexture = readBMP("Textures/dino_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight); //pupet texture input
+	PuppetTexture = readBMP("Textures/turtle_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight); //pupet texture input
     if(PuppetTexture == 0){
         std::cerr<<"Error: Puppet texture does not exist \n";
         return -1;
@@ -159,8 +158,6 @@ int main(int argc, char* argv[] ){
         }
     }
     image.close();
-
-
 
 //Clear up files.
 	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures);
