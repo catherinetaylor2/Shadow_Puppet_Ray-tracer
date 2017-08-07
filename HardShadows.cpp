@@ -89,7 +89,7 @@ int main(int argc, char* argv[] ){
             vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
             LightRayDirection.normalize();
             Ray RayFired(pixelCoord, rayDirections);
-            value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
+            value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
         }
 
         for(int z = 0; z<testIterations; ++z){
@@ -110,7 +110,7 @@ int main(int argc, char* argv[] ){
                 vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
                 LightRayDirection.normalize();
                 Ray RayFired(pixelCoord, rayDirections);
-                value += triangle::intersection_value(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
+                value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
             }
         }
         delete[] intersectionColours;

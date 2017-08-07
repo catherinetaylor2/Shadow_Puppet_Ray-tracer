@@ -99,7 +99,7 @@ int main(int argc, char* argv[] ){
             rayDirectionOuter.normalize();
             Ray rayOuter(PointOnScreen, rayDirectionOuter);
 
-             value +=  triangle::intersection_value_s(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  z, innerLight, outerLight);        
+             value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  z, innerLight, outerLight);        
         }
 
         for(int z = 0; z<testIterations; z++){
@@ -128,7 +128,7 @@ int main(int argc, char* argv[] ){
                 rayDirectionOuter.normalize();
                 Ray rayOuter(PointOnScreen, rayDirectionOuter);
 
-                value +=  triangle::intersection_value_s(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  0, innerLight, outerLight);        
+                value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  0, innerLight, outerLight);        
             }
         }
         delete [] intersectionColours; 
