@@ -17,7 +17,7 @@
 #include "BITMAP.hpp"
 #include "scene.hpp"
 #include "triangle.hpp"
-#include "search_tree.hpp"
+#include "binarySearchTree.hpp"
 
 #define infinity FLT_MAX;
 #define PI 3.141592654f
@@ -53,10 +53,10 @@ int main(int argc, char* argv[] ){
         return -1;
     }
 	DinoMesh.get_mesh_data(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces);
-    search_tree* root; 
-    std::vector<search_tree*> LeafNodes;
-    search_tree::leaf_nodes(vertices, faceVertices, numberOfFaces, &LeafNodes);
-	search_tree::build_tree(vertices, faceVertices, &LeafNodes, &root);
+    binarySearchTree* root; 
+    std::vector<binarySearchTree*> LeafNodes;
+    binarySearchTree::findLeafNodes(vertices, faceVertices, numberOfFaces, &LeafNodes);
+	binarySearchTree::buildTree(vertices, faceVertices, &LeafNodes, &root);
 	std::cout<<"Inputs loaded \n";
 
     vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);  //Set up camera position
@@ -149,7 +149,7 @@ int main(int argc, char* argv[] ){
     image.close();
 
 	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures); //Clear up files.
-    search_tree::delete_tree(root);
+    binarySearchTree::deleteTree(root);
     delete [] img;
     delete [] TextureData;
     delete [] PuppetTexture;

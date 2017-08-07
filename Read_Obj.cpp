@@ -183,15 +183,15 @@ void ObjFile::get_face_data(int** face_vertex, int** face_normals, int** face_te
   for(int i=0; i<3*number_of_faces; i+=3){//store in arrays of integers
     t=fscanf(myObject, "%s %i %c %i %c %i %i %c %i %c %i %i %c %i %c %i", str, &i1, &c1, &i2, &c2, &i3, &i4, &c3, &i5, &c4, &i6, &i7, &c5, &i8, &c6, &i9);
     s=str;
-    (*face_normals)[i] = i3;
-    (*face_normals)[i+1]=i6;
-    (*face_normals)[i+2]=i9;
-    (*face_vertex)[i]=i1;
-    (*face_vertex)[i+1]= i4;
-    (*face_vertex)[i+2]=i7;
-    (*face_textures)[i]=i2;
-    (*face_textures)[i+1]=i5;
-    (*face_textures)[i+2]=i8;
+    (*face_normals)[i] = i3 -1;
+    (*face_normals)[i+1]=i6 -1;
+    (*face_normals)[i+2]=i9-1;
+    (*face_vertex)[i]=i1-1;
+    (*face_vertex)[i+1]= i4-1;
+    (*face_vertex)[i+2]=i7-1;
+    (*face_textures)[i]=i2 -1;
+    (*face_textures)[i+1]=i5-1 ;
+    (*face_textures)[i+2]=i8 -1;
   }
    fclose(myObject);
 }

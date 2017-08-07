@@ -6,7 +6,7 @@
 #include "triangle.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
-#include "search_tree.hpp"
+#include "binarySearchTree.hpp"
 #include "scene.hpp"
 
 triangle::triangle(vector3 Vertex1, vector3 Vertex2, vector3 Vertex3){ //triangle constructor
@@ -14,7 +14,7 @@ triangle::triangle(vector3 Vertex1, vector3 Vertex2, vector3 Vertex3){ //triangl
     vertex2.setValue(Vertex2.x(), Vertex2.y(), Vertex2.z());
     vertex3.setValue(Vertex3.x(), Vertex3.y(), Vertex3.z());
 
-    vector3 Normal = vector3::crossproduct(vector3::subtract(vertex2, vertex1), vector3::subtract(vertex3, vertex1));
+    vector3 Normal = (vector3::crossproduct(vector3::subtract(vertex2, vertex1), vector3::subtract(vertex3, vertex1)));
     Normal.normalize();
     normal.setValue(Normal.x(), Normal.y(), Normal.z()); 
     planeConstant = vector3::dotproduct(normal, vertex1); //n.x = d
@@ -29,22 +29,21 @@ float triangle::RayTriangleIntersection(Ray R){
     vector3 intersectionPoint = vector3::add(R.get_origin(), vector3::ScalarMultiply(t,  R.get_direction())); //OuterPOI
 
     if( //test if inside triangle
-    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex2, vector3::ScalarMultiply(-1, vertex1)), vector3::add(intersectionPoint, vector3::ScalarMultiply(-1, vertex1))), normal)>=-0.00001f)&&
-    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex3, vector3::ScalarMultiply(-1, vertex2)), vector3::add(intersectionPoint,vector3::ScalarMultiply(-1, vertex2))), normal)>=-0.00001f)&&
-    (vector3::dotproduct(vector3::crossproduct(vector3::add(vertex1, vector3::ScalarMultiply(-1, vertex3)), vector3::add(intersectionPoint, vector3::ScalarMultiply(-1, vertex3))), normal)>=-0.00001f))
-    {
+    (vector3::dotproduct(vector3::crossproduct(vector3::subtract(vertex2,vertex1), vector3::subtract(intersectionPoint, vertex1)), normal)>=-0.00001f)&&
+    (vector3::dotproduct(vector3::crossproduct(vector3::subtract(vertex3,vertex2), vector3::subtract(intersectionPoint, vertex2)), normal)>=-0.00001f)&&
+    (vector3::dotproduct(vector3::crossproduct(vector3::subtract(vertex1,vertex3), vector3::subtract(intersectionPoint, vertex3)), normal)>=-0.00001f)){
         return t;
     }
     return 0;
 }
- float triangle::getPOI(search_tree* root, float*vertices, Ray R, int* faces, int*minValue, int**k){ //use bounding boxes to find intersection.
-    Bounding_box B_root(root->parameters[0],root->parameters[1], root->parameters[2],root->parameters[3],root->parameters[4],root->parameters[5]);
+ float triangle::getPOI(binarySearchTree* root, float*vertices, Ray R, int* faceVertices, int*minValue, int**k){ //use bounding boxes to find intersection.
+    BoundingBox rootBox(root->parameters[0],root->parameters[1], root->parameters[2],root->parameters[3],root->parameters[4],root->parameters[5]);
     std::vector<int> output; //stores possible triangles.
     float t_min = infinity;
 	int index1, index2, index3;
     output.clear();
-    if(B_root.ray_box_intersection(R)==1){
-        search_tree::traverse_tree(root, R, &output); //test each bounding box.
+    if(rootBox.rayBoxIntersection(R)==1){
+        binarySearchTree::traverseTree(root, R, &output); //test each bounding box.
     }
     *k = new int[output.size()+1];
     (*k)[0] = -1;
@@ -59,7 +58,7 @@ float triangle::RayTriangleIntersection(Ray R){
         int index;
         for (int z=1; z<(*k)[0]+1; z++){
             index = (*k)[z];
-            index1 = faces[3*index] -1, index2 = faces[3*index+1]-1, index3 = faces[3*index+2] -1 ;
+            index1 = faceVertices[3*index], index2 = faceVertices[3*index+1], index3 = faceVertices[3*index+2];
             vector3 Vertex1(vertices[3*index1], vertices[3*index1+1], vertices[3*index1+2]);
             vector3 Vertex2(vertices[3*index2], vertices[3*index2+1], vertices[3*index2+2]);
             vector3 Vertex3(vertices[3*index3], vertices[3*index3+1], vertices[3*index3+2]);
@@ -86,7 +85,7 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     float denominator;    
     int index1, index2, index3;
 
-    index1 = faceVertices[3*triangleIndex] -1, index2 = faceVertices[3*triangleIndex+1]-1, index3 = faceVertices[3*triangleIndex+2] -1 ; 
+    index1 = faceVertices[3*triangleIndex], index2 = faceVertices[3*triangleIndex+1], index3 = faceVertices[3*triangleIndex+2]; 
     vector3 point1(V[3*index1], V[3*index1+1], V[3*index1+2]);
     vector3 point2(V[3*index2], V[3*index2+1], V[3*index2+2]);
     vector3 point3(V[3*index3], V[3*index3+1], V[3*index3+2]);
@@ -102,7 +101,7 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     (barycentric)[1] = tuv.y();
     (barycentric)[2] = tuv.z();
 
-    int t_index1 = faceTextures[3*triangleIndex]-1, t_index2 = faceTextures[3*triangleIndex+1]-1, t_index3 = faceTextures[3*triangleIndex+2]-1; //get texture values from obj
+    int t_index1 = faceTextures[3*triangleIndex], t_index2 = faceTextures[3*triangleIndex+1], t_index3 = faceTextures[3*triangleIndex+2]; //get texture values from obj
     float vt_1x = Textures[2*t_index1], vt_1y = Textures[2*t_index1+1], vt_2x = Textures[2*t_index2], vt_2y = Textures[2*t_index2+1], vt_3x = Textures[2*t_index3], vt_3y = Textures[2*t_index3+1];
 
     float u_coord, v_coord, alpha, beta, Vertex12r, Vertex12g, Vertex12b, Vertex34r, Vertex34g, Vertex34b;
@@ -149,7 +148,7 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
 
   delete[] barycentric;
 }
-float triangle::getColour(Ray R, search_tree* root, float*vertices, int* faceVertices, int*faceTextures, float*Textures,  unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, vector3 LightDirection, float**colours, int index){
+float triangle::getColour(Ray R, binarySearchTree* root, float*vertices, int* faceVertices, int*faceTextures, float*Textures,  unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, vector3 LightDirection, float**colours, int index){
     int minValue = -1, *k;
     float value;
     float t_min = triangle::getPOI(root, vertices, R,faceVertices, &minValue, &k); //test for intersection with quad
@@ -182,7 +181,7 @@ float triangle::getColour(Ray R, search_tree* root, float*vertices, int* faceVer
     return value;
     }
         
-float triangle::getColourSoft(Ray rayOuter, Ray rayInner, search_tree* root, float* vertices, int* faceVertices, int*faceTextures, float*Textures, unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, vector3 L, float**colours, int index, light innerLight, light OuterLight){
+float triangle::getColourSoft(Ray rayOuter, Ray rayInner, binarySearchTree* root, float* vertices, int* faceVertices, int*faceTextures, float*Textures, unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, vector3 L, float**colours, int index, light innerLight, light OuterLight){
     int minValueOuter = -1, *kInner, minValueInner = -1, *kOuter;
     float value;
     float t_minOuter = triangle::getPOI(root, vertices, rayOuter,faceVertices, &minValueOuter, &kInner);
