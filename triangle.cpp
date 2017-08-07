@@ -101,46 +101,28 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     (barycentric)[1] = tuv.y();
     (barycentric)[2] = tuv.z();
 
-    int t_index1 = faceTextures[3*triangleIndex], t_index2 = faceTextures[3*triangleIndex+1], t_index3 = faceTextures[3*triangleIndex+2]; //get texture values from obj
-    float vt_1x = Textures[2*t_index1], vt_1y = Textures[2*t_index1+1], vt_2x = Textures[2*t_index2], vt_2y = Textures[2*t_index2+1], vt_3x = Textures[2*t_index3], vt_3y = Textures[2*t_index3+1];
+    int textureIndex1 = faceTextures[3*triangleIndex], textureIndex2 = faceTextures[3*triangleIndex+1], textureIndex3 = faceTextures[3*triangleIndex+2]; //get texture values from obj
+    float textureValue1x = Textures[2*textureIndex1], textureValue1y = Textures[2*textureIndex1+1], textureValue2x = Textures[2*textureIndex2], textureValue2y = Textures[2*textureIndex2+1], textureValue3x = Textures[2*textureIndex3], textureValue3y = Textures[2*textureIndex3+1];
 
-    float u_coord, v_coord, alpha, beta, Vertex12r, Vertex12g, Vertex12b, Vertex34r, Vertex34g, Vertex34b;
-    int Vertex1x,Vertex1y, Vertex2x, v4y;
-    u_coord = (barycentric[0]*vt_1x +barycentric[1]*vt_2x+barycentric[2]*vt_3x)*puppetWidth; //use barycentric coords to find position inside triangle
-    v_coord = (barycentric[0]*vt_1y +barycentric[1]*vt_2y+barycentric[2]*vt_3y)*puppetHeight;
-    Vertex1x = (int)floor(u_coord); //find corner pixel values
-    Vertex1y = (int)ceil(v_coord);
-    Vertex2x = (int)ceil(u_coord);
-    v4y = (int)floor(v_coord);
-    if (Vertex1x<0){
-        Vertex1x=0;
-    }
-    if (Vertex2x<0){
-        Vertex2x=0;
-    }
-    if (Vertex1y<0){
-        Vertex1y=0;
-    }
-    if (v4y<0){
-        v4y=0;
-    }
+    float uCoord, vCoord, alpha, beta, Vertex12r, Vertex12g, Vertex12b, Vertex34r, Vertex34g, Vertex34b;
+    int Vertex1x,Vertex1y, Vertex2x, Vertex4y;
+    uCoord = (barycentric[0]*textureValue1x +barycentric[1]*textureValue2x+barycentric[2]*textureValue3x)*puppetWidth; //use barycentric coords to find position inside triangle
+    vCoord = (barycentric[0]*textureValue1y +barycentric[1]*textureValue2y+barycentric[2]*textureValue3y)*puppetHeight;
+    Vertex1x = std::max((int)floor(uCoord), 0); //find corner pixel values
+    Vertex1y = std::max((int)ceil(vCoord), 0);
+    Vertex2x = std::max((int)ceil(uCoord), 0);
+    Vertex4y = std::max((int)floor(vCoord), 0);
 
-    alpha = (float)(u_coord - (Vertex2x - Vertex1x)*Vertex1x)/(float) (Vertex2x - Vertex1x);
-    beta = (float)(v_coord - (Vertex1y - v4y)*v4y)/(float) (Vertex1y - v4y);
+    alpha = std::min((float)(uCoord - (Vertex2x - Vertex1x)*Vertex1x)/(float) (Vertex2x - Vertex1x), 1.0f);
+    beta = std::min((float)(vCoord - (Vertex1y - Vertex4y)*Vertex4y)/(float) (Vertex1y - Vertex4y), 1.0f);
 
-    if (alpha >1){
-        alpha=1;
-    }
-    if(beta>1){
-        beta =1;
-    }
 //bilinear interpolation to find texture value
     Vertex12r = (1-alpha)*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex1x] + alpha*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex2x]; 
     Vertex12g = (1-alpha)*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex1x+1] + alpha*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex2x+1];
     Vertex12b = (1-alpha)*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex1x+2] + alpha*puppetTexture[Vertex1y*puppetWidth*3 + 3*Vertex2x+2];    
-    Vertex34r = (1-alpha)*puppetTexture[v4y*puppetWidth*3 + 3*Vertex1x] + alpha*puppetTexture[v4y*puppetWidth*3 + 3*Vertex2x];
-    Vertex34g = (1-alpha)*puppetTexture[v4y*puppetWidth*3 + 3*Vertex1x+1] + alpha*puppetTexture[v4y*puppetWidth*3 + 3*Vertex2x+1];
-    Vertex34b = (1-alpha)*puppetTexture[v4y*puppetWidth*3 + 3*Vertex1x+2] + alpha*puppetTexture[v4y*puppetWidth*3 + 3*Vertex2x+2];
+    Vertex34r = (1-alpha)*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex1x] + alpha*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex2x];
+    Vertex34g = (1-alpha)*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex1x+1] + alpha*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex2x+1];
+    Vertex34b = (1-alpha)*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex1x+2] + alpha*puppetTexture[Vertex4y*puppetWidth*3 + 3*Vertex2x+2];
 
     (*colour)[0] = (1-beta)*Vertex12r + beta*Vertex34r; //colour of texture point
     (*colour)[1] = (1-beta)*Vertex12g + beta*Vertex34g;
