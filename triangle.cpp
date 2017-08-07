@@ -160,7 +160,7 @@ float triangle::intersection_value(Ray R, search_tree* root, float*vertices, int
         vector3 POI = vector3::add(R.get_origin(), vector3::ScalarMultiply(t_min,  R.get_direction()));  
         vector3 dis = vector3::add(POI, vector3::ScalarMultiply(-1, R.get_origin()));
         float dist = sqrt(vector3::dotproduct(dis,dis));
-        float alpha = fabs(dist)/50.0f; //distance function for level of blending
+        float alpha = fabs(dist)/75.0f; //distance function for level of blending
 
         if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
             #pragma omp critical

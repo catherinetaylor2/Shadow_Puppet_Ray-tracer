@@ -28,7 +28,15 @@ int main(int argc, char* argv[] ){
     unsigned char * TextureData, * PuppetTexture;
 	int ScreenTextureWidth, ScreenTextureHeight,  PuppetTextureWidth, PuppetTextureHeight;
 	TextureData = readBMP("Textures/sheet_5.bmp", &ScreenTextureWidth, &ScreenTextureHeight); //Screen texture input
+    if(TextureData == 0){
+        std::cerr<<"Error: Screen texture does not exist \n";
+        return -1;
+    }
 	PuppetTexture = readBMP("Textures/dino_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight); //pupet texture input
+    if(PuppetTexture == 0){
+        std::cerr<<"Error: Puppet texture does not exist \n";
+        return -1;
+    }
     std::cout<<"Texture bitmaps loaded\n";
 
     int width, height;
@@ -41,24 +49,14 @@ int main(int argc, char* argv[] ){
 		height = 500;
 	}
 
-
-for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
-        std::string j;
-
-        if(ObjFileInput < 10){
-			j = "000"+std::to_string(ObjFileInput);
-		}
-		else if ((ObjFileInput>=10)&&(ObjFileInput<100)){
-			j= "00" + std::to_string(ObjFileInput);
-		}
-		else{
-			j= "0" + std::to_string(ObjFileInput);
-		}
-
     //Quad mesh inputs
     float *vertices, *normals, *Textures;
     int numberOfFaces, *faceVertices, *faceNormals, *faceTextures;
     ObjFile DinoMesh("Objects/quad.obj");
+    if(DinoMesh.doesExist()==false){
+        std::cerr<<"Error: Object does not exist \n";
+        return -1;
+    }
 	DinoMesh.get_mesh_data(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces);
     search_tree* root; 
     std::vector<search_tree*> LeafNodes;
@@ -75,7 +73,7 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
     vector3 LightCentre(0.0f, 0.0f, 50.0f);
     light myLight(LightLength, 1.0f, LightCentre);
 
-    int iterations = 10; //number of rays per pixel
+    int iterations = 50; //number of rays per pixel
 	unsigned char *img = new unsigned char[3*myScene.get_x_res()*myScene.get_y_res()];
 
     for (int x = 0; x<3*myScene.get_x_res()*myScene.get_y_res(); x+=3){ //loops over all pixels
@@ -168,7 +166,6 @@ for (int ObjFileInput = 1;  ObjFileInput<2; ++ObjFileInput){
 	ObjFile::clean_up(vertices, normals, Textures, faceVertices, faceNormals, faceTextures);
     search_tree::delete_tree(root);
     delete [] img;
-}
     delete [] TextureData;
     delete [] PuppetTexture;
 

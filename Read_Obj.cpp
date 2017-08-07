@@ -12,6 +12,12 @@
 
 ObjFile::ObjFile(std::string name){ //constructor
 	fn = name;
+  if ((fopen(fn.c_str(), "r"))==nullptr){
+    exist = false;
+  }
+  else{
+    exist = true;
+  }
 }
 
 void ObjFile::get_vertices(float** V){ //find the vertices and store in array V

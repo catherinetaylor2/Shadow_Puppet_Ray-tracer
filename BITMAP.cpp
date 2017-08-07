@@ -37,6 +37,9 @@ void write_bitmap (BITMAP_File_Header* file_header, BITMAP_Info_Header* info_hea
 unsigned char* readBMP(char* filename, int* image_width, int* image_height){
     int i;
     FILE* f = fopen(filename, "rb");
+    if(f==nullptr){
+        return 0;
+    }
     unsigned char info[54];
     fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
     // extract image height and width from header

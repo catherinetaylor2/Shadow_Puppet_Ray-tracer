@@ -30,12 +30,19 @@ int main(int argc, char* argv[] ){
     unsigned char * data;
 	int ScreenTextureWidth, ScreenTextureHeight;
 	data = readBMP("Textures/sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
-    std::cout<<"width "<<ScreenTextureWidth<<" "<<ScreenTextureHeight<<"\n";
+     if(data == 0){
+        std::cerr<<"Error: Screen texture does not exist \n";
+        return -1;
+    }
 
 //Input puppet texture data   
     unsigned char *PuppetTexture;
 	int PuppetTextureWidth, PuppetTextureHeight;
-	PuppetTexture = readBMP("Textures/turtle_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
+	PuppetTexture = readBMP("Textures/seahorse_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
+    if(PuppetTexture == 0){
+        std::cerr<<"Error: Puppet textures does not exist \n";
+        return -1;
+    }
 
     int width, height;
 	if(argc>1){
@@ -51,6 +58,10 @@ int main(int argc, char* argv[] ){
     float *V, *N, *VT;
     int F, *FV, *FN, *FT;
     ObjFile mesh_dino("Objects/quad_t.obj");
+      if(mesh_dino.doesExist()==false){
+        std::cerr<<"Error: Object does not exist \n";
+        return -1;
+    }
 	mesh_dino.get_mesh_data(mesh_dino, &FV, &FN, &FT, &VT, &N, &V, &F);
     search_tree* root; 
     std::vector<search_tree*> leaf_nodes;

@@ -21,11 +21,15 @@ class ObjFile{
         std::string get_file_name(void){
             return fn;
         }
+        bool doesExist(void){
+            return exist;
+        }
         void get_mesh_data(ObjFile mesh, int** face_vertex, int** face_normals, int** face_textures, float** texture_coords, float** normals, float** vertices, int* number_of_faces);
     private:
 		std::string fn;
         int number_of_normals;
         int number_of_vertices;
         int number_of_faces;
+        bool exist;
 };
 #endif
