@@ -144,7 +144,6 @@ float triangle::getColour(Ray R, binarySearchTree* root, float*vertices, int* fa
         float alpha = fabs(OuterDist)/75.0f; //OuterDistance function for level of blending
 
         if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
-            #pragma omp critical
             value = std::min(alpha,1.3f*pow(vector3::dotproduct(planeNormal, LightDirection),50.0f)+0.4f); //clamps shadow value at screen colour
         }
         else{ //intesects with quad but not puppet

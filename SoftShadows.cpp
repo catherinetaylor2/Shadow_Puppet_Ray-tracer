@@ -38,12 +38,16 @@ int main(int argc, char* argv[] ){
 	ScreenData = readBMP("Textures/sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight);
      if(ScreenData == 0){
         std::cerr<<"Error: Screen texture does not exist \n";
-        return -1;
+        return false;
     }
-	PuppetTexture = readBMP("Textures/seahorse_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
+    if((ScreenTextureWidth<width)||(ScreenTextureHeight<height)){
+        std::cerr<<"Error: Screen texture must be same resolution as output image \n";
+        return false;
+    }
+	PuppetTexture = readBMP("Textures/turtle_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight);
     if(PuppetTexture == 0){
         std::cerr<<"Error: Puppet textures does not exist \n";
-        return -1;
+        return false;
     }  
 
     float *vertices, *normals, *textures; //Puppet mesh inputs
@@ -51,7 +55,7 @@ int main(int argc, char* argv[] ){
     ObjFile PuppetMesh("Objects/quad.obj");
     if(PuppetMesh.doesExist()==false){
         std::cerr<<"Error: Object does not exist \n";
-        return -1;
+        return false;
     }
 	PuppetMesh.getMeshData(PuppetMesh, &faceVertices, &faceNormals, &faceTextures, &textures, &normals, &vertices, &NumberOfFaces, &numberOfVertices);
     binarySearchTree* root; 
@@ -68,7 +72,7 @@ int main(int argc, char* argv[] ){
     light innerLight(innerLightLength,1.0f, innerCentre);
     light outerLight(outerLightLength, 0.9f, outerCentre);
 
-    int iterations=100;
+    int iterations=500;
 
 	unsigned char *img = new unsigned char[3*myScene.getXRes()*myScene.getYRes()];
     for (int x = 0; x<3*myScene.getXRes()*myScene.getYRes(); x+=3){

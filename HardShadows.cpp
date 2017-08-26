@@ -4,7 +4,7 @@
 //
 // Began May 2017
 //
-//Produces hard shadow puppets
+//Produces hard shadow puppetsgngn
 
 #include <cstdlib>
 #include <iostream>
@@ -35,22 +35,26 @@ int main(int argc, char* argv[] ){
 
     unsigned char * TextureData, * PuppetTexture;
 	int ScreenTextureWidth, ScreenTextureHeight,  PuppetTextureWidth, PuppetTextureHeight;
-	TextureData = readBMP("Textures/sheet_5.bmp", &ScreenTextureWidth, &ScreenTextureHeight); //Screen texture input
+	TextureData = readBMP("Textures/sheet6.bmp", &ScreenTextureWidth, &ScreenTextureHeight); //Screen texture input
     if(TextureData == 0){
         std::cerr<<"Error: Screen texture does not exist \n";
-        return -1;
+        return false;
+    }
+    if((ScreenTextureWidth<width)||(ScreenTextureHeight<height)){
+        std::cerr<<"Error: Screen texture must be same resolution as output image \n";
+        return false;
     }
 	PuppetTexture = readBMP("Textures/turtle_texture.bmp", &PuppetTextureWidth, &PuppetTextureHeight); //pupet texture input
     if(PuppetTexture == 0){
         std::cerr<<"Error: Puppet texture does not exist \n";
-        return -1;
+        return false;
     }
     float *vertices, *normals, *Textures;     //Quad mesh inputs
     int numberOfFaces, *faceVertices, *faceNormals, *faceTextures, numberOfVertices;
     ObjFile DinoMesh("Objects/quad.obj");
     if(DinoMesh.doesExist()==false){
         std::cerr<<"Error: Object does not exist \n";
-        return -1;
+        return false;
     }
 	DinoMesh.getMeshData(DinoMesh, &faceVertices, &faceNormals, &faceTextures, &Textures, &normals, &vertices, &numberOfFaces, &numberOfVertices);
     binarySearchTree* root; 
@@ -59,7 +63,7 @@ int main(int argc, char* argv[] ){
 	binarySearchTree::buildTree(vertices, faceVertices, &LeafNodes, &root);
 	std::cout<<"Inputs loaded \n";
 
-    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,1.0f), lookup(0.0f,1.0f,-30.0f);  //Set up camera position
+    vector3 eye(0.0f,0.0f,-75.0f), lookat(0.0f,0.0f,0.0f), lookup(0.0f,1.0f,-30.0f);  //Set up camera position
 
     scene myScene(width, height, 90.0f, 60.0f, eye, lookat, lookup); //Set up scene and light position.
     float LightLength = 0.25f;
@@ -114,12 +118,12 @@ int main(int argc, char* argv[] ){
             }
         }
         delete[] intersectionColours;
-        
+   
         //Using Monte Carlo, average values.
         float R = TextureData[j*ScreenTextureWidth*3 + 3*i]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
         float G = TextureData[j*ScreenTextureWidth*3 + 3*i+1]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
         float B = TextureData[j*ScreenTextureWidth*3 + 3*i+2]*value/(float)(iterations*(adaptive==1)+testIterations)*myLight.get_illumination();
-        
+  
         if(R>255.0f){ //clamp at 255
             R = 255.0f;
         }
