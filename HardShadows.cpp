@@ -30,7 +30,7 @@ int main(int argc, char* argv[] ){
 		height = atoi(argv[2]);
 	}
 	else{
-		width = 500, height = 500;
+        width = 500, height = 500;
 	}
 
     unsigned char * TextureData, * PuppetTexture;
@@ -157,6 +157,4 @@ int main(int argc, char* argv[] ){
     delete [] img;
     delete [] TextureData;
     delete [] PuppetTexture;
-
-    return 0;
 }

@@ -116,7 +116,8 @@ void ObjFile::getFaceData(int** faceVertices, int** faceNormals, int** faceTextu
   }
   *faceVertices = new int[3*NumberOfFaces], *faceNormals = new int[3*NumberOfFaces], *faceTextures = new int[3*NumberOfFaces];
   for(int i=0; i<3*NumberOfFaces; i+=3){//store in arrays of integers
-    fscanf(myObject,"%s%i/%i/%i%i/%i/%i%i/%i/%i",str,&(*faceVertices)[i],&(*faceTextures)[i],&(*faceNormals)[i],&(*faceVertices)[i+1],&(*faceTextures)[i+1],&(*faceNormals)[i+1],&(*faceVertices)[i+2],&(*faceTextures)[i+2],&(*faceNormals)[i+2]);
+    fscanf(myObject,"%s%i/%i/%i%i/%i/%i%i/%i/%i",str,&(*faceVertices)[i],&(*faceTextures)[i],&(*faceNormals)[i],&(*faceVertices)[i+1],
+          &(*faceTextures)[i+1],&(*faceNormals)[i+1],&(*faceVertices)[i+2],&(*faceTextures)[i+2],&(*faceNormals)[i+2]);
   }
   for(int i = 0; i<3*NumberOfFaces; i++){
     (*faceNormals)[i]+=-1, (*faceVertices)[i]+=-1, (*faceTextures)[i]+=-1;
@@ -124,7 +125,9 @@ void ObjFile::getFaceData(int** faceVertices, int** faceNormals, int** faceTextu
   fclose(myObject);
 }
 
-void ObjFile::getMeshData(ObjFile mesh,int** faceVertices, int** faceNormals, int** faceTextures, float** textures, float** normals, float** vertices, int* NumberOfFaces, int* NumberOfVertices){
+void ObjFile::getMeshData(ObjFile mesh,int** faceVertices, int** faceNormals, int** faceTextures, 
+                          float** textures, float** normals, float** vertices, 
+                          int* NumberOfFaces, int* NumberOfVertices){
 		mesh.getVertices(vertices);
 		mesh.getTextures(textures);
 		mesh.getNormals(normals);

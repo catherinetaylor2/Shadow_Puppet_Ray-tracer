@@ -174,6 +174,4 @@ int main(int argc, char* argv[] ){
     delete[]PuppetTexture;
     delete[] ScreenData;
     delete[] img;
-
-    return 0;
 }

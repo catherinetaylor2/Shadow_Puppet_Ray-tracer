@@ -6,11 +6,17 @@
 
 class vector3{
     public:        
-        vector3(float x, float y, float z);
-        vector3();
-        float x(void);
-        float y(void);
-        float z(void);
+        vector3(float x, float y, float z): xVal(x), yVal(y), zVal(z) {}
+        vector3(): xVal(0.0f), yVal(0.0f), zVal(0.0f) {}
+        float x(void){
+            return xVal;
+        }
+        float y(void){
+            return yVal;
+        }
+        float z(void){
+            return zVal;
+        }
         void normalize(void);
         void setValue(float x, float y, float z);
         static inline float dotproduct(vector3 vec1, vector3 vec2){

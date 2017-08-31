@@ -80,7 +80,8 @@ float triangle::RayTriangleIntersection(Ray R){
     return t_min; //value of t when intersection occurs
  }
 
-void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, Ray R, unsigned char* puppetTexture, int* faceTextures, float* Textures, int puppetWidth, int puppetHeight, float **colour)
+void triangle::getTextureValue( int triangleIndex, int* faceVertices, float *V, Ray R, unsigned char* puppetTexture, int* faceTextures, float* Textures, 
+                                int puppetWidth, int puppetHeight, float **colour)
 { //use cramers rule to find baryentric coords.
     float denominator;    
     int index1, index2, index3;
@@ -93,7 +94,8 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     vector3 E1 = vector3::add(point2, vector3::ScalarMultiply(-1, point1));
     vector3 E2 = vector3::add(point3, vector3::ScalarMultiply(-1, point1));
     denominator = vector3::dotproduct( vector3::crossproduct(R.getDirection(), E2), E1);
-    vector3 M (vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.getDirection(), E2), T),vector3::dotproduct( vector3::crossproduct(T, E1), R.getDirection()));
+    vector3 M(  vector3::dotproduct(vector3::crossproduct(T, E1), E2),vector3::dotproduct(vector3::crossproduct(R.getDirection(), E2), T),
+                vector3::dotproduct( vector3::crossproduct(T, E1), R.getDirection()));
     vector3 tuv = vector3::ScalarMultiply(1.0f/(float)denominator, M);
     
     float *barycentric = new float[3]; //store barycentric coords
@@ -101,8 +103,11 @@ void triangle::getTextureValue(int triangleIndex, int* faceVertices, float *V, R
     (barycentric)[1] = tuv.y();
     (barycentric)[2] = tuv.z();
 
-    int textureIndex1 = faceTextures[3*triangleIndex], textureIndex2 = faceTextures[3*triangleIndex+1], textureIndex3 = faceTextures[3*triangleIndex+2]; //get texture values from obj
-    float textureValue1x = Textures[2*textureIndex1], textureValue1y = Textures[2*textureIndex1+1], textureValue2x = Textures[2*textureIndex2], textureValue2y = Textures[2*textureIndex2+1], textureValue3x = Textures[2*textureIndex3], textureValue3y = Textures[2*textureIndex3+1];
+    int textureIndex1 = faceTextures[3*triangleIndex], textureIndex2 = faceTextures[3*triangleIndex+1], textureIndex3 = faceTextures[3*triangleIndex+2]; 
+    //get texture values from obj
+    float   textureValue1x = Textures[2*textureIndex1], textureValue1y = Textures[2*textureIndex1+1], 
+            textureValue2x = Textures[2*textureIndex2], textureValue2y = Textures[2*textureIndex2+1], 
+            textureValue3x = Textures[2*textureIndex3], textureValue3y = Textures[2*textureIndex3+1];
 
     float uCoord, vCoord, alpha, beta, Vertex12r, Vertex12g, Vertex12b, Vertex34r, Vertex34g, Vertex34b;
     int Vertex1x,Vertex1y, Vertex2x, Vertex4y;
@@ -137,14 +142,16 @@ float triangle::getColour(Ray R, binarySearchTree* root, float*vertices, int* fa
     if(minValue!=-1){ //if intersects with quad
         int triangle = k[minValue+1]; //triangle which has intersected with ray.
         float* colour = new float[3];
-        triangle::getTextureValue(triangle, faceVertices, vertices, R, puppetTexture, faceTextures, Textures, puppetWidth, puppetHeight, &colour); //find value of texture at OuterPOI
+        triangle::getTextureValue(  triangle, faceVertices, vertices, R, puppetTexture, faceTextures, Textures, puppetWidth, 
+                                    puppetHeight, &colour); //find value of texture at OuterPOI
         vector3 OuterPOI = vector3::add(R.getOrigin(), vector3::ScalarMultiply(t_min,  R.getDirection()));  
         vector3 OuterDistVec = vector3::add(OuterPOI, vector3::ScalarMultiply(-1, R.getOrigin()));
         float OuterDist = sqrt(vector3::dotproduct(OuterDistVec,OuterDistVec));
         float alpha = fabs(OuterDist)/75.0f; //OuterDistance function for level of blending
 
         if((colour[0]<10)&&(colour[1]<10)&&(colour[2]<10)){ //if intersects with puppet
-            value = std::min(alpha,1.3f*pow(vector3::dotproduct(planeNormal, LightDirection),50.0f)+0.4f); //clamps shadow value at screen colour
+            value = std::min(alpha,1.3f*pow(vector3::dotproduct(planeNormal, LightDirection),50.0f)+0.4f);
+             //clamps shadow value at screen colour
         }
         else{ //intesects with quad but not puppet
             #pragma omp critical
@@ -162,7 +169,9 @@ float triangle::getColour(Ray R, binarySearchTree* root, float*vertices, int* fa
     return value;
     }
         
-float triangle::getColourSoft(Ray rayOuter, Ray rayInner, binarySearchTree* root, float* vertices, int* faceVertices, int*faceTextures, float*Textures, unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, vector3 L, float**colours, int index, light innerLight, light OuterLight){
+float triangle::getColourSoft(  Ray rayOuter, Ray rayInner, binarySearchTree* root, float* vertices, int* faceVertices, int*faceTextures, 
+                                float*Textures, unsigned char* puppetTexture, int puppetWidth, int puppetHeight, vector3 planeNormal, 
+                                vector3 L, float**colours, int index, light innerLight, light OuterLight){
     int minValueOuter = -1, *kInner, minValueInner = -1, *kOuter;
     float value;
     float t_minOuter = triangle::getPOI(root, vertices, rayOuter,faceVertices, &minValueOuter, &kInner);
@@ -181,10 +190,12 @@ float triangle::getColourSoft(Ray rayOuter, Ray rayInner, binarySearchTree* root
         if(minValueOuter!=-1){
             int triangle = kInner[minValueOuter+1];
             float* OuterColour = new float[3];
-            triangle::getTextureValue(triangle, faceVertices, vertices, rayOuter, puppetTexture, faceTextures, Textures, puppetWidth, puppetHeight, &OuterColour); 
+            triangle::getTextureValue(  triangle, faceVertices, vertices, rayOuter, puppetTexture, faceTextures, Textures, puppetWidth, 
+                                        puppetHeight, &OuterColour); 
             int triangle2 = kOuter[minValueInner+1];
             float* InnerColour = new float[3];
-            triangle::getTextureValue(triangle2, faceVertices, vertices, rayInner, puppetTexture, faceTextures, Textures, puppetWidth, puppetHeight, &InnerColour); 
+            triangle::getTextureValue(  triangle2, faceVertices, vertices, rayInner, puppetTexture, faceTextures, Textures, puppetWidth,
+                                        puppetHeight, &InnerColour); 
 
             if((OuterColour[0]<10)&&(OuterColour[1]<10)&&(OuterColour[2]<10)){
                 #pragma omp critical
@@ -205,7 +216,8 @@ float triangle::getColourSoft(Ray rayOuter, Ray rayInner, binarySearchTree* root
         else{
             int triangle = kOuter[minValueInner+1];
             float* OuterColour = new float[3];
-            triangle::getTextureValue(triangle, faceVertices, vertices, rayInner, puppetTexture, faceTextures, Textures, puppetWidth, puppetHeight, &OuterColour); 
+            triangle::getTextureValue(  triangle, faceVertices, vertices, rayInner, puppetTexture, faceTextures, Textures, puppetWidth, 
+                                        puppetHeight, &OuterColour); 
             if((OuterColour[0]<10)&&(OuterColour[1]<10)&&(OuterColour[2]<10)){
                 #pragma omp critical
                 value = std::min(0.85f*innerLight.get_illumination(),1.3f*pow(vector3::dotproduct(innerLight.get_normal(), L),10.0f));                        
