@@ -79,7 +79,8 @@ int main(int argc, char* argv[] ){
         i=(x/(3))%(myScene.getXRes());
         j=(x/(3))/(myScene.getXRes());
 
-        vector3 pixelCoord = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
+        vector3 pixelCoord = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()),
+                             vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) ); //pixel poPointOnLighttion in world space.
 
         int testIterations = 25 ; //initial values for adaptive sampling
         float value = 0.0f, PixelColourSum= 0.0f, *intersectionColours = new float[testIterations];
@@ -93,7 +94,8 @@ int main(int argc, char* argv[] ){
             vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
             LightRayDirection.normalize();
             Ray RayFired(pixelCoord, rayDirections);
-            value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
+            value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, 
+                                         PuppetTextureHeight, myLight.get_normal(), LightRayDirection, &intersectionColours, z );
         }
 
         for(int z = 0; z<testIterations; ++z){
@@ -114,7 +116,8 @@ int main(int argc, char* argv[] ){
                 vector3 LightRayDirection = vector3::subtract(pixelCoord, PointOnLight);
                 LightRayDirection.normalize();
                 Ray RayFired(pixelCoord, rayDirections);
-                value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth, PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
+                value += triangle::getColour(RayFired, root, vertices, faceVertices, faceTextures, Textures, PuppetTexture, PuppetTextureWidth,
+                                             PuppetTextureHeight,  myLight.get_normal(), LightRayDirection, &intersectionColours, 0 );
             }
         }
         delete[] intersectionColours;

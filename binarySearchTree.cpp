@@ -40,8 +40,10 @@ bool BoundingBox::rayBoxIntersection(Ray R){ //find boxes which ray intersects w
 
 void binarySearchTree::traverseTree(binarySearchTree*root, Ray R, std::vector<int> *output){ //traverse tree postorder
     if(((root->leftNode!=nullptr))||((root->rightNode!=nullptr))){ //if not null go left, ow go right
-        BoundingBox rightBox(root->rightNode->parameters[0],root->rightNode->parameters[1], root->rightNode->parameters[2],root->rightNode->parameters[3],root->rightNode->parameters[4],root->rightNode->parameters[5]);
-        BoundingBox leftBox(root->leftNode->parameters[0],root->leftNode->parameters[1], root->leftNode->parameters[2],root->leftNode->parameters[3],root->leftNode->parameters[4],root->leftNode->parameters[5]);
+        BoundingBox rightBox(root->rightNode->parameters[0],root->rightNode->parameters[1], root->rightNode->parameters[2],root->rightNode->parameters[3],
+                             root->rightNode->parameters[4],root->rightNode->parameters[5]);
+        BoundingBox leftBox(root->leftNode->parameters[0],root->leftNode->parameters[1], root->leftNode->parameters[2],root->leftNode->parameters[3],
+                            root->leftNode->parameters[4],root->leftNode->parameters[5]);
         if ((root->rightNode!=nullptr)&&(rightBox.rayBoxIntersection(R)==1)) {
             traverseTree(root->rightNode,R, output);
         }  
@@ -60,7 +62,8 @@ void binarySearchTree::traverseTree(binarySearchTree*root, Ray R, std::vector<in
 }
 
 void binarySearchTree::findParameters(int i, float* vertices,int*faceVertices, std::vector<float> *parameters, std::vector<float> initialParameters){ //use vertex values to find max and min values
-    float xmin = initialParameters[0], ymin = initialParameters[2], zmin = initialParameters[4], xmax=initialParameters[1], ymax=initialParameters[3], zmax = initialParameters[5];
+    float xmin = initialParameters[0], ymin = initialParameters[2], zmin = initialParameters[4],
+          xmax=initialParameters[1], ymax=initialParameters[3], zmax = initialParameters[5];
     for(int j=0; j<3; j++){
         if (vertices[3*faceVertices[3*i+j]]< xmin){
         xmin = vertices[3*faceVertices[3*i+j]];
@@ -84,7 +87,8 @@ void binarySearchTree::findParameters(int i, float* vertices,int*faceVertices, s
     *parameters = {xmin, xmax, ymin, ymax, zmin, zmax};
 }
 
-void binarySearchTree::findLeafNodes(float* vertices, int*faceVertices, int number_of_faceVertices, std::vector<binarySearchTree*> *leafNodes){ //create vector full of leaf nodes
+void binarySearchTree::findLeafNodes(float* vertices, int*faceVertices, int number_of_faceVertices, std::vector<binarySearchTree*> *leafNodes){ 
+    //create vector full of leaf nodes
     std::vector<float> parameters;
     std::vector<float> initialParameters = {infinity, -1*infinity, infinity, -1*infinity, infinity, -1*infinity};
     for(int i = 0; i<number_of_faceVertices; i++){ 
@@ -103,7 +107,8 @@ void binarySearchTree::findLeafNodes(float* vertices, int*faceVertices, int numb
     }    
 }
 
-void binarySearchTree::buildTree(float* vertices, int* faceVertices, std::vector<binarySearchTree*>* leafNodes, binarySearchTree**root){ //use leaf node vector to build bst.
+void binarySearchTree::buildTree(float* vertices, int* faceVertices, std::vector<binarySearchTree*>* leafNodes, binarySearchTree**root){ 
+    //use leaf node vector to build bst.
     std::vector<float> parameters;
    
     while((*leafNodes).size()>1){ //while vector has more than one element

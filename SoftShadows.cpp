@@ -81,7 +81,8 @@ int main(int argc, char* argv[] ){
         i=(x/(3))%(myScene.getXRes());
         j=(x/(3))/(myScene.getXRes());
 
-        vector3 PointOnScreen = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()), vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) );
+        vector3 PointOnScreen = vector3::add3(myScene.getCorner(), vector3::ScalarMultiply(1*i*myScene.getRatio(),myScene.u()), 
+                                              vector3::ScalarMultiply(-1*j*myScene.getRatio(),myScene.v()) );
 
         int testIterations = 25 ; 
         float value = 0.0f, PixelColourSum = 0.0f, *intersectionColours = new float[testIterations];
@@ -90,20 +91,25 @@ int main(int argc, char* argv[] ){
         #pragma omp parallel for
         for(int z =0; z <testIterations; z++){
             vector3 PointOnInnerLight = innerLight.PointOnSource();
-            vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(), PointOnInnerLight.z()-PointOnScreen.z());
-            vector3 LightDirInner(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(), PointOnScreen.z()-PointOnInnerLight.z());
-            LightDirInner.normalize();
+            vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(), 
+                                 PointOnInnerLight.z()-PointOnScreen.z());
+            vector3 LightDirIn(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(), 
+                               PointOnScreen.z()-PointOnInnerLight.z());
+            LightDirIn.normalize();
             rayDirection.normalize();
             Ray rayInner(PointOnScreen, rayDirection);
 
             vector3 PointOnOuterLight = outerLight.PointOnSource();
-            vector3 rayDirectionOuter(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(), PointOnOuterLight.z()-PointOnScreen.z());
-            vector3 LightDirOuter(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(), PointOnScreen.z()-PointOnOuterLight.z());
-            LightDirOuter.normalize();
-            rayDirectionOuter.normalize();
-            Ray rayOuter(PointOnScreen, rayDirectionOuter);
+            vector3 rayDirectionOut(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(),
+                                    PointOnOuterLight.z()-PointOnScreen.z());
+            vector3 LightDirOut(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(),
+                                PointOnScreen.z()-PointOnOuterLight.z());
+            LightDirOut.normalize();
+            rayDirectionOut.normalize();
+            Ray rayOuter(PointOnScreen, rayDirectionOut);
 
-             value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  z, innerLight, outerLight);        
+             value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, 
+                                               PuppetTextureHeight, innerLight.get_normal(), LightDirIn, &intersectionColours,  z, innerLight, outerLight);        
         }
 
         for(int z = 0; z<testIterations; z++){
@@ -119,20 +125,25 @@ int main(int argc, char* argv[] ){
             #pragma omp parallel for 
             for (int l=0; l<iterations;l++){
                 vector3 PointOnInnerLight = innerLight.PointOnSource();
-                vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(), PointOnInnerLight.z()-PointOnScreen.z());
-                vector3 LightDirInner(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(), PointOnScreen.z()-PointOnInnerLight.z());
-                LightDirInner.normalize();
+                vector3 rayDirection(PointOnInnerLight.x()-PointOnScreen.x(), PointOnInnerLight.y()-PointOnScreen.y(),
+                                     PointOnInnerLight.z()-PointOnScreen.z());
+                vector3 LightDirIn(PointOnScreen.x() - PointOnInnerLight.x(), PointOnScreen.y() - PointOnInnerLight.y(),
+                                   PointOnScreen.z()-PointOnInnerLight.z());
+                LightDirIn.normalize();
                 rayDirection.normalize();
                 Ray rayInner(PointOnScreen, rayDirection);
 
                 vector3 PointOnOuterLight =outerLight.PointOnSource();
-                vector3 rayDirectionOuter(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(), PointOnOuterLight.z()-PointOnScreen.z());
-                vector3 LightDirOuter(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(), PointOnScreen.z()-PointOnOuterLight.z());
-                LightDirOuter.normalize();
-                rayDirectionOuter.normalize();
-                Ray rayOuter(PointOnScreen, rayDirectionOuter);
+                vector3 rayDirectionOut(PointOnOuterLight.x()-PointOnScreen.x(), PointOnOuterLight.y()-PointOnScreen.y(),
+                                        PointOnOuterLight.z()-PointOnScreen.z());
+                vector3 LightDirOut(PointOnScreen.x() - PointOnOuterLight.x(), PointOnScreen.y() - PointOnOuterLight.y(),
+                                    PointOnScreen.z()-PointOnOuterLight.z());
+                LightDirOut.normalize();
+                rayDirectionOut.normalize();
+                Ray rayOuter(PointOnScreen, rayDirectionOut);
 
-                value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth, PuppetTextureHeight, innerLight.get_normal(), LightDirInner, &intersectionColours,  0, innerLight, outerLight);        
+                value +=  triangle::getColourSoft(rayOuter, rayInner, root, vertices, faceVertices, faceTextures, textures,PuppetTexture, PuppetTextureWidth,
+                                                  PuppetTextureHeight, innerLight.get_normal(), LightDirIn, &intersectionColours,  0, innerLight, outerLight);        
             }
         }
         delete [] intersectionColours; 
